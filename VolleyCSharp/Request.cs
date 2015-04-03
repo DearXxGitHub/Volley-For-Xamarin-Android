@@ -238,7 +238,7 @@ namespace VolleyCSharp
             this.mCanceled = true;
         }
 
-        public bool IsCanceled
+        public virtual bool IsCanceled
         {
             get
             {
@@ -340,7 +340,7 @@ namespace VolleyCSharp
             IMMEDIATE
         }
 
-        public Priority GetPriority()
+        public virtual Priority GetPriority()
         {
             return Priority.NORMAL;
         }
