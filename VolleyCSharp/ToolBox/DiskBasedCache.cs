@@ -346,5 +346,43 @@ namespace VolleyCSharp.ToolBox
             n |= ((Read(@is) & 0xFFL) << 56);
             return n;
         }
+
+        public static void WriteString(OutputStream os, String s)
+        {
+            byte[] b = Encoding.UTF8.GetBytes(s);
+            WriteLong(os, b.Length);
+            os.Write(b, 0, b.Length);
+        }
+
+        public static String ReadString(InputStream @is)
+        {
+            int n = (int)ReadLong(@is);
+            byte[] b = StreamToBytes(@is, n);
+            return Encoding.UTF8.GetString(b);
+        }
+
+        public static void WriteStringStringMap(Dictionary<String, String> map, OutputStream os)
+        {
+            if (map != null)
+            {
+                WriteInt(os, map.Count);
+                foreach (KeyValuePair<String, String> entry in map)
+                {
+                    WriteString(os, entry.Key);
+                    WriteString(os, entry.Value);
+                }
+            }
+            else
+            {
+                WriteInt(os, 0);
+            }
+        }
+
+        public static Dictionary<String, String> ReadStringStringMap(InputStream @is)
+        {
+            int size = ReadInt(@is);
+            Dictionary<String, String> result = new Dictionary<string, string>(size);
+
+        }
     }
 }
