@@ -1,0 +1,12 @@
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\bin\Debug\VolleyCSharp.dll
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\bin\Debug\VolleyCSharp.pdb
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\bin\Debug\VolleyCSharp.dll.mdb
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\bin\Debug\VolleyCSharp.VolleyCSharp.apk
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\bin\Debug\VolleyCSharp.VolleyCSharp-Signed.apk
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\VolleyCSharp.csprojResolveAssemblyReference.cache
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\VolleyCSharp.dll
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\VolleyCSharp.pdb
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\android\bin\VolleyCSharp.VolleyCSharp.apk
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\res\values\strings.xml
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\R.cs.flag
+E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\uploadflags.txt
