@@ -72,7 +72,10 @@
     <Compile Include="TimeoutError.cs" />
     <Compile Include="ToolBox\AndroidAuthenticator.cs" />
     <Compile Include="ToolBox\ByteArrayPool.cs" />
+    <Compile Include="ToolBox\CacheHeader.cs" />
     <Compile Include="ToolBox\ClearCacheRequest.cs" />
+    <Compile Include="ToolBox\CountingInputStream.cs" />
+    <Compile Include="ToolBox\DiskBasedCache.cs" />
     <Compile Include="ToolBox\IAuthenticator.cs" />
     <Compile Include="ToolBox\IHttpStack.cs" />
     <Compile Include="ToolBox\StringRequest.cs" />
