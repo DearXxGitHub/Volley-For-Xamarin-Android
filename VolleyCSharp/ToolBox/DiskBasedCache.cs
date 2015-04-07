@@ -382,7 +382,13 @@ namespace VolleyCSharp.ToolBox
         {
             int size = ReadInt(@is);
             Dictionary<String, String> result = new Dictionary<string, string>(size);
-
+            for (int i = 0; i < size; i++)
+            {
+                String key = ReadString(@is);
+                String value = ReadString(@is);
+                result.Add(key, value);
+            }
+            return result;
         }
     }
 }

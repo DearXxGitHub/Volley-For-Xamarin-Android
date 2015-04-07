@@ -76,6 +76,9 @@
     <Compile Include="ToolBox\ClearCacheRequest.cs" />
     <Compile Include="ToolBox\CountingInputStream.cs" />
     <Compile Include="ToolBox\DiskBasedCache.cs" />
+    <Compile Include="ToolBox\HttpClientStack.cs" />
+    <Compile Include="ToolBox\HttpHeaderParser.cs" />
+    <Compile Include="ToolBox\HttpPatch.cs" />
     <Compile Include="ToolBox\IAuthenticator.cs" />
     <Compile Include="ToolBox\IHttpStack.cs" />
     <Compile Include="ToolBox\StringRequest.cs" />
