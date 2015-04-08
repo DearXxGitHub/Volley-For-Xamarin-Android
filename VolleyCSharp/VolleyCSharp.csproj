@@ -79,8 +79,10 @@
     <Compile Include="ToolBox\HttpClientStack.cs" />
     <Compile Include="ToolBox\HttpHeaderParser.cs" />
     <Compile Include="ToolBox\HttpPatch.cs" />
+    <Compile Include="ToolBox\HurlStack.cs" />
     <Compile Include="ToolBox\IAuthenticator.cs" />
     <Compile Include="ToolBox\IHttpStack.cs" />
+    <Compile Include="ToolBox\IUrlRewriter.cs" />
     <Compile Include="ToolBox\StringRequest.cs" />
     <Compile Include="ToolBox\Volley.cs" />
     <Compile Include="VolleyError.cs" />
