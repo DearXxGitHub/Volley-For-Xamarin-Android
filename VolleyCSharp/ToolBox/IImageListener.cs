@@ -14,6 +14,6 @@ namespace VolleyCSharp.ToolBox
 {
     public interface IImageListener : IErrorListener
     {
-        void OnResponse(ImageContainer response, bool isImmediate);
+        void OnResponse(VolleyCSharp.ToolBox.ImageLoader.ImageContainer response, bool isImmediate);
     }
 }

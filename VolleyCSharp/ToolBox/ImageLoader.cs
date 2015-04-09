@@ -21,7 +21,7 @@ namespace VolleyCSharp.ToolBox
         private static Dictionary<String, BatchedImageRequest> mInFlightRequests = new Dictionary<string, BatchedImageRequest>();
         private static Dictionary<String, BatchedImageRequest> mBatchedResponses = new Dictionary<string, BatchedImageRequest>();
         private Handler mHandler = new Handler(Looper.MainLooper);
-        private Java.Lang.IRunnable mRunnable;
+        private Action mRunnable;
 
         public ImageLoader(RequestQueue queue, IImageCache imageCache)
         {
@@ -90,7 +90,125 @@ namespace VolleyCSharp.ToolBox
 
         protected Request MakeImageRequest(String requestUrl, int maxWidth, int maxHeight, Android.Widget.ImageView.ScaleType scaleType, String cacheKey)
         {
-            
+            var listener = new DefaultImageResponseListener()
+            {
+                CacheKey = cacheKey,
+                OnGetImageSuccess = OnGetImageSuccess
+            };
+            var errorListener = new DefaultErrorResponseListener()
+            {
+                CacheKey = cacheKey,
+                OnErrorResponse = OnGetImageError
+            };
+            return new ImageRequest(requestUrl, listener, maxWidth, maxHeight, scaleType, Android.Graphics.Bitmap.Config.Rgb565, errorListener);
+        }
+
+        public void SetBatchedResponseDelay(int newBatchedResponseDelayMs)
+        {
+            mBatchResponseDelayMs = newBatchedResponseDelayMs;
+        }
+
+        protected void OnGetImageSuccess(String cacheKey, Bitmap response)
+        {
+            mCache.PutBitmap(cacheKey, response);
+
+            BatchedImageRequest request = null;
+            mInFlightRequests.TryGetValue(cacheKey, out request);
+            mInFlightRequests.Remove(cacheKey);
+
+            if (request != null)
+            {
+                request.mResponseBitmap = response;
+                BatchResponse(cacheKey, request);
+            }
+        }
+
+        protected void OnGetImageError(String cacheKey, VolleyError error)
+        {
+            BatchedImageRequest request = null;
+            mInFlightRequests.TryGetValue(cacheKey, out request);
+            mInFlightRequests.Remove(cacheKey);
+
+            if (request != null)
+            {
+                request.Error = error;
+                BatchResponse(cacheKey, request);
+            }
+        }
+
+        private void BatchResponse(String cacheKey, BatchedImageRequest request)
+        {
+            mBatchedResponses.Add(cacheKey, request);
+            if (mRunnable == null)
+            {
+                mRunnable = () =>
+                    {
+                        foreach (BatchedImageRequest bir in mBatchedResponses.Values)
+                        {
+                            foreach (ImageContainer container in bir.mContainers)
+                            {
+                                if (container.mListener == null)
+                                {
+                                    continue;
+                                }
+                                if (bir.Error == null)
+                                {
+                                    container.mBitmap = bir.mResponseBitmap;
+                                    container.mListener.OnResponse(container, false);
+                                }
+                                else
+                                {
+                                    container.mListener.OnErrorResponse(bir.Error);
+                                }
+                            }
+                        }
+                        mBatchedResponses.Clear();
+                        mRunnable = null;
+                    };
+            }
+            mHandler.PostDelayed(mRunnable, mBatchResponseDelayMs);
+        }
+
+        private void ThrowIfNotOnMainThread()
+        {
+            if (Looper.MyLooper() != Looper.MainLooper)
+            {
+                throw new Java.Lang.IllegalStateException("ImageLoader must be invoked from the main thread.");
+            }
+        }
+
+        private static String GetCacheKey(String url, int maxWidth, int maxHeight, Android.Widget.ImageView.ScaleType scaleType)
+        {
+            return new StringBuilder(url.Length + 12).Append("#W").Append(maxWidth)
+                .Append("#H").Append(maxHeight).Append("#S").Append(scaleType.Ordinal()).Append(url).ToString();
+        }
+
+        internal class DefaultImageResponseListener : IListener
+        {
+            public Action<String, Bitmap> OnGetImageSuccess;
+            public String CacheKey{get;set;}
+
+            public void OnResponse(object response)
+            {
+                if (OnGetImageSuccess != null)
+                {
+                    OnGetImageSuccess(CacheKey, response as Bitmap);
+                }
+            }
+        }
+
+        internal class DefaultErrorResponseListener : IErrorListener
+        {
+            public Action<String, VolleyError> OnErrorResponse;
+            public String CacheKey { get; set; }
+
+            public void IErrorListener.OnErrorResponse(VolleyError error)
+            {
+                if (OnErrorResponse != null)
+                {
+                    OnErrorResponse(CacheKey, error);
+                }
+            }
         }
 
         internal class DefaultImageListener : IImageListener
@@ -129,10 +247,10 @@ namespace VolleyCSharp.ToolBox
 
         internal class ImageContainer
         {
-            private Bitmap mBitmap;
-            private IImageListener mListener;
             private String mCacheKey;
             private String mRequestUrl;
+            public IImageListener mListener;
+            public Bitmap mBitmap;
 
             public ImageContainer(Bitmap bitmap, String requestUrl, String cacheKey, IImageListener listener)
             {
@@ -161,17 +279,36 @@ namespace VolleyCSharp.ToolBox
                 }
                 else
                 {
-                    
+                    mBatchedResponses.TryGetValue(mCacheKey, out request);
+                    if (request != null)
+                    {
+                        request.RemoveContainerAndCancelIfNecessary(this);
+                        if (request.mContainers.Count == 0)
+                        {
+                            mBatchedResponses.Remove(mCacheKey);
+                        }
+                    }
                 }
+            }
+
+            public Bitmap GetBitmap()
+            {
+                return mBitmap;
+            }
+
+            public String GetRequestUrl()
+            {
+                return mRequestUrl;
             }
         }
 
         internal class BatchedImageRequest
         {
             private Request mRequest;
-            private Bitmap mResponseBitmap;
+            
             private VolleyError mError;
-            private List<ImageContainer> mContainers = new List<ImageContainer>();
+            public List<ImageContainer> mContainers = new List<ImageContainer>();
+            public Bitmap mResponseBitmap;
 
             public BatchedImageRequest(Request request, ImageContainer container)
             {
