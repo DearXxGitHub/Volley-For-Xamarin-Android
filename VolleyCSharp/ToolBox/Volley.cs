@@ -14,6 +14,59 @@ namespace VolleyCSharp.ToolBox
 {
     public class Volley
     {
+        private static String DEFAULT_CACHE_DIR = "volley";
 
+        public static RequestQueue NewRequestQueue(Context context, IHttpStack stack, int maxDiskCacheBytes)
+        {
+            Java.IO.File cacheDir = new Java.IO.File(context.CacheDir, DEFAULT_CACHE_DIR);
+            String userAgent = "volley/0";
+            try
+            {
+                String packageName = context.PackageName;
+                var info = context.PackageManager.GetPackageInfo(packageName, 0);
+                userAgent = packageName + "/" + info.VersionCode;
+            }
+            catch (Android.Content.PM.PackageManager.NameNotFoundException) { }
+
+            if (stack == null)
+            {
+                if (Build.VERSION.SdkInt >= BuildVersionCodes.Gingerbread)
+                {
+                    stack = new HurlStack();
+                }
+                else
+                {
+                    stack = new HttpClientStack(Android.Net.Http.AndroidHttpClient.NewInstance(userAgent));
+                }
+            }
+
+            INetwork network = new BasicNetwork(stack);
+
+            RequestQueue queue;
+            if (maxDiskCacheBytes <= -1)
+            {
+                queue = new RequestQueue(new DiskBasedCache(cacheDir), network);
+            }
+            else
+            {
+                queue = new RequestQueue(new DiskBasedCache(cacheDir, maxDiskCacheBytes), network);
+            }
+            return queue;
+        }
+
+        public static RequestQueue NewRequestQueue(Context context, int maxDiskCacheBytes)
+        {
+            return NewRequestQueue(context, null, maxDiskCacheBytes);
+        }
+
+        public static RequestQueue NewRequestQueue(Context context, IHttpStack stack)
+        {
+            return NewRequestQueue(context, stack, -1);
+        }
+
+        public static RequestQueue NewRequestQueue(Context context)
+        {
+            return NewRequestQueue(context, null);
+        }
     }
 }

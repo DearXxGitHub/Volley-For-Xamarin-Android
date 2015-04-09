@@ -9,11 +9,13 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Android.Graphics;
 
-namespace VolleyCSharp
+namespace VolleyCSharp.ToolBox
 {
-    public interface IListener
+    public interface IImageCache
     {
-        void OnResponse(object response);
+        Bitmap GetBitmap(String url);
+        void PutBitmap(String url, Bitmap bitmap);
     }
 }

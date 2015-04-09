@@ -71,6 +71,8 @@
     <Compile Include="ServerError.cs" />
     <Compile Include="TimeoutError.cs" />
     <Compile Include="ToolBox\AndroidAuthenticator.cs" />
+    <Compile Include="ToolBox\BasicNetwork.cs" />
+    <Compile Include="ToolBox\BatchedImageRequest.cs" />
     <Compile Include="ToolBox\ByteArrayPool.cs" />
     <Compile Include="ToolBox\CacheHeader.cs" />
     <Compile Include="ToolBox\ClearCacheRequest.cs" />
@@ -82,7 +84,13 @@
     <Compile Include="ToolBox\HurlStack.cs" />
     <Compile Include="ToolBox\IAuthenticator.cs" />
     <Compile Include="ToolBox\IHttpStack.cs" />
+    <Compile Include="ToolBox\IImageCache.cs" />
+    <Compile Include="ToolBox\IImageListener.cs" />
+    <Compile Include="ToolBox\ImageLoader.cs" />
     <Compile Include="ToolBox\IUrlRewriter.cs" />
+    <Compile Include="ToolBox\NoCache.cs" />
+    <Compile Include="ToolBox\PoolingByteArrayOutputStream.cs" />
+    <Compile Include="ToolBox\RequestFuture.cs" />
     <Compile Include="ToolBox\StringRequest.cs" />
     <Compile Include="ToolBox\Volley.cs" />
     <Compile Include="VolleyError.cs" />

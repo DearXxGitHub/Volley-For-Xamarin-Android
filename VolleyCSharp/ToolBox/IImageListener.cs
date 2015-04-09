@@ -10,10 +10,10 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 
-namespace VolleyCSharp
+namespace VolleyCSharp.ToolBox
 {
-    public interface IListener
+    public interface IImageListener : IErrorListener
     {
-        void OnResponse(object response);
+        void OnResponse(ImageContainer response, bool isImmediate);
     }
 }
