@@ -261,12 +261,12 @@ namespace VolleyCSharp
             return GetParamsEncoding();
         }
 
-        public String GetPostBodyContentType()
+        public virtual String GetPostBodyContentType()
         {
             return GetBodyContentType();
         }
 
-        public byte[] GetPostBody()
+        public virtual byte[] GetPostBody()
         {
             Dictionary<String, String> postParams = GetPostParams();
             if (postParams != null && postParams.Count > 0)
@@ -286,12 +286,12 @@ namespace VolleyCSharp
             return DEFAULT_PARAMS_ENCODING;
         }
 
-        public String GetBodyContentType()
+        public virtual String GetBodyContentType()
         {
             return "application/x-www-form-urlencoded; charset=" + GetParamsEncoding();
         }
 
-        public byte[] GetBody()
+        public virtual byte[] GetBody()
         {
             Dictionary<String,String> param = GetParams();
             if (param != null && param.Count > 0)

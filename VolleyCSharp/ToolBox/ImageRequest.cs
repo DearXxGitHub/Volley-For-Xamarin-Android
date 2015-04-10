@@ -9,6 +9,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Android.Graphics;
 
 namespace VolleyCSharp.ToolBox
 {
@@ -51,7 +52,116 @@ namespace VolleyCSharp.ToolBox
         private static int GetResizedDimension(int maxPrimary, int maxSecondary, int actualPrimary,
             int actualSecondary, Android.Widget.ImageView.ScaleType scaleType)
         {
+            if ((maxPrimary == 0) && (maxSecondary == 0))
+            {
+                return actualPrimary;
+            }
 
+            if (scaleType == Android.Widget.ImageView.ScaleType.FitXy)
+            {
+                if (maxPrimary == 0)
+                {
+                    return actualPrimary;
+                }
+                return maxPrimary;
+            }
+
+            double ratio = 0;
+
+            if (maxPrimary == 0)
+            {
+                ratio = (double)maxSecondary / (double)actualSecondary;
+                return (int)(actualPrimary * ratio);
+            }
+
+            if (maxSecondary == 0)
+            {
+                return maxPrimary;
+            }
+
+            ratio = (double)actualSecondary / (double)actualPrimary;
+            int resized = maxPrimary;
+
+            if (scaleType == Android.Widget.ImageView.ScaleType.CenterCrop)
+            {
+                if ((resized * ratio) < maxSecondary)
+                {
+                    resized = (int)(maxSecondary / ratio);
+                }
+                return resized;
+            }
+
+            if ((resized * ratio) > maxSecondary)
+            {
+                resized = (int)(maxSecondary / ratio);
+            }
+            return resized;
+        }
+
+        public override Response ParseNetworkResponse(NetworkResponse response)
+        {
+            lock (sDecodeLock)
+            {
+                try
+                {
+                    return DoParse(response);
+                }
+                catch (Java.Lang.OutOfMemoryError e)
+                {
+                    VolleyLog.E("Caught OOM for {0} byte image,url={1}", response.Data.Length, Url);
+                    return Response.Error(new ParseError(e));
+                }
+            }
+        }
+
+        private Response DoParse(NetworkResponse response)
+        {
+            byte[] data = response.Data;
+            BitmapFactory.Options decodeOption = new BitmapFactory.Options();
+            Bitmap bitmap = null;
+            if (mMaxWidth == 0 && mMaxHeight == 0)
+            {
+                decodeOption.InPreferredConfig = mDecodeConfig;
+                bitmap = BitmapFactory.DecodeByteArray(data, 0, data.Length, decodeOption);
+            }
+            else
+            {
+                decodeOption.InJustDecodeBounds = true;
+                BitmapFactory.DecodeByteArray(data, 0, data.Length, decodeOption);
+                int actualWidth = decodeOption.OutWidth;
+                int actualHeight = decodeOption.OutHeight;
+
+                int desiredWidth = GetResizedDimension(mMaxWidth, mMaxHeight, actualWidth, actualHeight, mScaleType);
+                int desiredHeight = GetResizedDimension(mMaxHeight, mMaxWidth, actualHeight, actualWidth, mScaleType);
+
+                decodeOption.InJustDecodeBounds = false;
+                decodeOption.InSampleSize = FindBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+                Bitmap tempBitmap = BitmapFactory.DecodeByteArray(data, 0, data.Length, decodeOption);
+
+                if (tempBitmap != null && (tempBitmap.Width > desiredWidth || tempBitmap.Height > desiredHeight))
+                {
+                    bitmap = Bitmap.CreateScaledBitmap(tempBitmap, desiredWidth, desiredHeight, true);
+                    tempBitmap.Recycle();
+                }
+                else
+                {
+                    bitmap = tempBitmap;
+                }
+            }
+
+            if (bitmap == null)
+            {
+                return Response.Error(new ParseError(response));
+            }
+            else
+            {
+                return Response.Success(bitmap, HttpHeaderParser.ParseCacheHeaders(response));
+            }
+        }
+
+        public override void DeliverResponse(object response)
+        {
+            mListener.OnResponse(response);
         }
     }
 }

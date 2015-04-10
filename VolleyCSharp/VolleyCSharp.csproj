@@ -88,6 +88,9 @@
     <Compile Include="ToolBox\ImageLoader.cs" />
     <Compile Include="ToolBox\ImageRequest.cs" />
     <Compile Include="ToolBox\IUrlRewriter.cs" />
+    <Compile Include="ToolBox\JsonArrayRequest.cs" />
+    <Compile Include="ToolBox\JsonObjectRequest.cs" />
+    <Compile Include="ToolBox\JsonRequest.cs" />
     <Compile Include="ToolBox\NoCache.cs" />
     <Compile Include="ToolBox\PoolingByteArrayOutputStream.cs" />
     <Compile Include="ToolBox\RequestFuture.cs" />
