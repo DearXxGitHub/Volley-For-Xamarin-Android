@@ -19,7 +19,7 @@ namespace VolleyCSharp.ToolBox
         private int mDefaultImageId;
         private int mErrorImageId;
         private ImageLoader mImageLoader;
-        private VolleyCSharp.ToolBox.ImageLoader.ImageContainer mImageContainer;
+        private ImageContainer mImageContainer;
 
         public NetworkImageView(Context context)
             : this(context, null) { }
@@ -115,14 +115,14 @@ namespace VolleyCSharp.ToolBox
             int maxWidth = wrapWidth ? 0 : width;
             int maxHeight = wrapHeight ? 0 : height;
 
-            VolleyCSharp.ToolBox.ImageLoader.ImageContainer newContainer = mImageLoader.Get(mUrl, new DefaultImageListener(), maxWidth, maxHeight, scaleType);
+            ImageContainer newContainer = mImageLoader.Get(mUrl, new DefaultImageListener(), maxWidth, maxHeight, scaleType);
             mImageContainer = newContainer;
         }
 
         internal class DefaultImageListener : IImageListener
         {
 
-            public void OnResponse(ImageLoader.ImageContainer response, bool isImmediate)
+            public void OnResponse(ImageContainer response, bool isImmediate)
             {
                 if (isImmediate && isInLayoutPass)
                 {

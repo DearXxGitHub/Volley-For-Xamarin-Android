@@ -33,6 +33,9 @@ namespace VolleyCSharp
         public AuthFailureError(String message, Java.Lang.Exception reason)
             : base(message, reason) { }
 
+        public AuthFailureError(NetworkResponse response)
+            : base(response) { }
+
         public Intent GetResolutionIntent()
         {
             return mResolutionIntent;

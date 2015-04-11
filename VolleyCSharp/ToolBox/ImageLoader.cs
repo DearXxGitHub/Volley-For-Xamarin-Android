@@ -29,11 +29,6 @@ namespace VolleyCSharp.ToolBox
             this.mCache = imageCache;
         }
 
-        public static IImageListener GetImageListener(ImageView view, int defaultImageResId, int errorImageResId)
-        {
-            return new DefaultImageListener(view, defaultImageResId, errorImageResId);
-        }
-
         public bool IsCached(String requestUrl, int maxWidth, int maxHeight)
         {
             return IsCached(requestUrl, maxWidth, maxHeight, Android.Widget.ImageView.ScaleType.CenterInside);
@@ -46,33 +41,85 @@ namespace VolleyCSharp.ToolBox
             return mCache.GetBitmap(cacheKey) != null;
         }
 
-        public ImageContainer Get(String requestUrl, IImageListener listener)
+        /// <summary>
+        /// 替代GetImageListener方法的重载Get
+        /// </summary>
+        public ImageContainer Get(String requestUrl, ImageView view, int defaultImageResId, int errorImageResId)
         {
-            return Get(requestUrl, listener, 0, 0);
+            return Get(requestUrl, 0, 0, view, defaultImageResId, errorImageResId);
         }
 
-        public ImageContainer Get(String requestUrl, IImageListener listener, int maxWidth, int maxHeight)
+        public ImageContainer Get(String requestUrl, int maxWidth, int maxHeight, ImageView view, int defaultImageResId, int errorImageResId)
         {
-            return Get(requestUrl, listener, maxWidth, maxHeight, Android.Widget.ImageView.ScaleType.CenterInside);
+            return Get(requestUrl, maxWidth, maxHeight, Android.Widget.ImageView.ScaleType.CenterInside, view, defaultImageResId, errorImageResId);
         }
 
-        public ImageContainer Get(String requestUrl, IImageListener listener, int maxWidth, int maxHeight, Android.Widget.ImageView.ScaleType scaleType)
+        public ImageContainer Get(String requestUrl, int maxWidth, int maxHeight, Android.Widget.ImageView.ScaleType scaleType,
+            ImageView view, int defaultImageResId, int errorImageResId)
+        {
+            return Get(requestUrl, maxWidth, maxHeight, scaleType,
+                (x, y) =>
+                {
+                    if (x.Bitmap != null)
+                    {
+                        view.SetImageBitmap(x.Bitmap);
+                    }
+                    else if (defaultImageResId != 0)
+                    {
+                        view.SetImageResource(defaultImageResId);
+                    }
+                }, (x) =>
+                {
+                    if (errorImageResId != 0)
+                    {
+                        view.SetImageResource(errorImageResId);
+                    }
+                });
+        }
+
+        public ImageContainer Get(String requestUrl, Action<ImageContainer, bool> successResponse,
+            Action<VolleyError> errorResponse)
+        {
+            return Get(requestUrl, 0, 0, successResponse, errorResponse);
+        }
+
+        public ImageContainer Get(String requestUrl, int maxWidth, int maxHeight, Action<ImageContainer, bool> successResponse,
+            Action<VolleyError> errorResponse)
+        {
+            return Get(requestUrl, maxWidth, maxHeight, Android.Widget.ImageView.ScaleType.CenterInside, successResponse, errorResponse);
+        }
+
+        public ImageContainer Get(String requestUrl, int maxWidth, int maxHeight, Android.Widget.ImageView.ScaleType scaleType,
+            Action<ImageContainer, bool> successResponse, Action<VolleyError> errorResponse)
         {
             ThrowIfNotOnMainThread();
+            if (successResponse == null)
+            {
+                throw new ArgumentNullException("successResponse不能为null，必须提供请求成功的委托。");
+            }
 
             String cacheKey = GetCacheKey(requestUrl, maxWidth, maxHeight, scaleType);
 
+            //缓存命中直接响应请求
             Bitmap cachedBitmap = mCache.GetBitmap(cacheKey);
             if (cachedBitmap != null)
             {
-                ImageContainer container = new ImageContainer(cachedBitmap, requestUrl, null, null);
-                listener.OnResponse(container, true);
+                ImageContainer container = new ImageContainer(cachedBitmap, requestUrl, null, mInFlightRequests,
+                    mBatchedResponses);
+                successResponse(container, true);
                 return container;
             }
 
-            ImageContainer imageContainer = new ImageContainer(null, requestUrl, cacheKey, listener);
-            listener.OnResponse(imageContainer, true);
+            //缓存未命中添加到请求中
+            ImageContainer imageContainer = new ImageContainer(null, requestUrl, cacheKey, mInFlightRequests,
+                mBatchedResponses);
 
+            imageContainer.ErrorResponse += errorResponse;
+            imageContainer.SuccessResponse += successResponse;
+
+            successResponse(imageContainer, true);
+
+            //是否存在相同的请求，存在则添加该请求，否则创建
             BatchedImageRequest request = null;
             mInFlightRequests.TryGetValue(cacheKey, out request);
             if (request != null)
@@ -110,6 +157,7 @@ namespace VolleyCSharp.ToolBox
 
         protected void OnGetImageSuccess(String cacheKey, Bitmap response)
         {
+            //将成功的请求放入缓存
             mCache.PutBitmap(cacheKey, response);
 
             BatchedImageRequest request = null;
@@ -118,7 +166,7 @@ namespace VolleyCSharp.ToolBox
 
             if (request != null)
             {
-                request.mResponseBitmap = response;
+                request.ResponseBitmap = response;
                 BatchResponse(cacheKey, request);
             }
         }
@@ -136,6 +184,7 @@ namespace VolleyCSharp.ToolBox
             }
         }
 
+        //响应请求
         private void BatchResponse(String cacheKey, BatchedImageRequest request)
         {
             mBatchedResponses.Add(cacheKey, request);
@@ -145,20 +194,23 @@ namespace VolleyCSharp.ToolBox
                     {
                         foreach (BatchedImageRequest bir in mBatchedResponses.Values)
                         {
-                            foreach (ImageContainer container in bir.mContainers)
+                            foreach (ImageContainer container in bir.Containers)
                             {
-                                if (container.mListener == null)
+                                if (container.OnSuccessResponse == null)
                                 {
                                     continue;
                                 }
                                 if (bir.Error == null)
                                 {
-                                    container.mBitmap = bir.mResponseBitmap;
-                                    container.mListener.OnResponse(container, false);
+                                    container.Bitmap = bir.ResponseBitmap;
+                                    container.OnSuccessResponse(container, false);
                                 }
                                 else
                                 {
-                                    container.mListener.OnErrorResponse(bir.Error);
+                                    if (container.OnErrorResponse != null)
+                                    {
+                                        container.OnErrorResponse(bir.Error);
+                                    }
                                 }
                             }
                         }
@@ -208,134 +260,6 @@ namespace VolleyCSharp.ToolBox
                 {
                     OnErrorResponse(CacheKey, error);
                 }
-            }
-        }
-
-        internal class DefaultImageListener : IImageListener
-        {
-            private ImageView mView;
-            private int mDefaultImageResId;
-            private int mErrorImageResId;
-
-            public DefaultImageListener(ImageView view, int defaultImageResId, int errorImageResId)
-            {
-                this.mView = view;
-                this.mDefaultImageResId = defaultImageResId;
-                this.mErrorImageResId = errorImageResId;
-            }
-
-            public void OnResponse(ImageContainer response, bool isImmediate)
-            {
-                if (response.GetBitmap() != null)
-                {
-                    mView.SetImageBitmap(response.GetBitmap());
-                }
-                else if (mDefaultImageResId != 0)
-                {
-                    mView.SetImageResource(mDefaultImageResId);
-                }
-            }
-
-            public void OnErrorResponse(VolleyError error)
-            {
-                if (mErrorImageResId != 0)
-                {
-                    mView.SetImageResource(mErrorImageResId);
-                }
-            }
-        }
-
-        internal class ImageContainer
-        {
-            private String mCacheKey;
-            private String mRequestUrl;
-            public IImageListener mListener;
-            public Bitmap mBitmap;
-
-            public ImageContainer(Bitmap bitmap, String requestUrl, String cacheKey, IImageListener listener)
-            {
-                this.mBitmap = bitmap;
-                this.mRequestUrl = requestUrl;
-                this.mCacheKey = cacheKey;
-                this.mListener = listener;
-            }
-
-            public void CancelRequest()
-            {
-                if (mListener == null)
-                {
-                    return;
-                }
-
-                BatchedImageRequest request = null;
-                mInFlightRequests.TryGetValue(mCacheKey, out request);
-                if (request != null)
-                {
-                    bool canceled = request.RemoveContainerAndCancelIfNecessary(this);
-                    if (canceled)
-                    {
-                        mInFlightRequests.Remove(mCacheKey);
-                    }
-                }
-                else
-                {
-                    mBatchedResponses.TryGetValue(mCacheKey, out request);
-                    if (request != null)
-                    {
-                        request.RemoveContainerAndCancelIfNecessary(this);
-                        if (request.mContainers.Count == 0)
-                        {
-                            mBatchedResponses.Remove(mCacheKey);
-                        }
-                    }
-                }
-            }
-
-            public Bitmap GetBitmap()
-            {
-                return mBitmap;
-            }
-
-            public String GetRequestUrl()
-            {
-                return mRequestUrl;
-            }
-        }
-
-        internal class BatchedImageRequest
-        {
-            private Request mRequest;
-            
-            private VolleyError mError;
-            public List<ImageContainer> mContainers = new List<ImageContainer>();
-            public Bitmap mResponseBitmap;
-
-            public BatchedImageRequest(Request request, ImageContainer container)
-            {
-                mRequest = request;
-                mContainers.Add(container);
-            }
-
-            public VolleyError Error
-            {
-                get { return this.mError; }
-                set { this.mError = value; }
-            }
-
-            public void AddContainer(ImageContainer container)
-            {
-                mContainers.Add(container);
-            }
-
-            public bool RemoveContainerAndCancelIfNecessary(ImageContainer container)
-            {
-                mContainers.Remove(container);
-                if (mContainers.Count == 0)
-                {
-                    mRequest.Cancel();
-                    return true;
-                }
-                return false;
             }
         }
     }

@@ -32,6 +32,8 @@ namespace VolleyCSharp.ToolBox
             mSslSocketFactory = sslSocketFactory;
         }
 
+        #region IHttpStack
+
         public Org.Apache.Http.IHttpResponse PerformRequest(Request request, Dictionary<string, string> additionalHeaders)
         {
             String url = request.Url;
@@ -40,8 +42,48 @@ namespace VolleyCSharp.ToolBox
             {
                 map = new Dictionary<string, string>();
             }
-            
+            map = map.Intersect(additionalHeaders).ToDictionary(x => x.Key, x => x.Value);
+
+            if (mUrlRewriter != null)
+            {
+                String rewritten = mUrlRewriter.RewriteUrl(url);
+                if (rewritten == null)
+                {
+                    throw new IOException("URL blocked by rewriter:" + url);
+                }
+                url = rewritten;
+            }
+
+            Java.Net.URL parsedUrl = new Java.Net.URL(url);
+            Java.Net.HttpURLConnection connection = OpenConnection(parsedUrl, request);
+            foreach (KeyValuePair<String,String> val in map)
+            {
+                connection.AddRequestProperty(val.Key, val.Value);
+            }
+            SetConnectionParametersForRequest(connection, request);
+
+            Org.Apache.Http.ProtocolVersion protocolVersion = new Org.Apache.Http.ProtocolVersion("HTTP", 1, 1);
+            int responseCode = (int)connection.ResponseCode;
+            if (responseCode == -1)
+            {
+                throw new IOException("Could not retrieve response code from HttpUrlConnection.");
+            }
+            Org.Apache.Http.IStatusLine responseStatus = new Org.Apache.Http.Message.BasicStatusLine(protocolVersion, responseCode,
+                connection.ResponseMessage);
+            var response = new Org.Apache.Http.Message.BasicHttpResponse(responseStatus);
+            response.Entity = EntityFromConnection(connection);
+            foreach (KeyValuePair<String,IList<String>> header in connection.HeaderFields)
+            {
+                if (header.Key != null)
+                {
+                    Org.Apache.Http.IHeader h = new Org.Apache.Http.Message.BasicHeader(header.Key, header.Value[0]);
+                    response.AddHeader(h);
+                }
+            }
+            return response;
         }
+
+        #endregion
 
         public static Org.Apache.Http.IHttpEntity EntityFromConnection(Java.Net.HttpURLConnection connection)
         {

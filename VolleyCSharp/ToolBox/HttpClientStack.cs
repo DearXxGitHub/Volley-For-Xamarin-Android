@@ -61,7 +61,7 @@ namespace VolleyCSharp.ToolBox
                         }
                         else
                         {
-                            new Org.Apache.Http.Client.Methods.HttpGet(request.Url);
+                            return new Org.Apache.Http.Client.Methods.HttpGet(request.Url);
                         }
                     }
                 case Request.Method.GET:
