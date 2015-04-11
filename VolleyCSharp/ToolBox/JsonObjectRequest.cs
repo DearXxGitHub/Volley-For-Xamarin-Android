@@ -26,17 +26,15 @@ namespace VolleyCSharp.ToolBox
 
         public JsonObjectRequest(Method method, String url, Org.Json.JSONObject jsonRequest, IListener listener,
             IErrorListener errorListener)
-            : base(method, url, (jsonRequest == null) ? null : jsonRequest.ToArray(), listener, errorListener) { }
+            : base(method, url, (jsonRequest == null) ? null : jsonRequest.ToString(), listener, errorListener) { }
 
         public JsonObjectRequest(String url, Org.Json.JSONObject jsonRequest, IListener listener,
             IErrorListener errorListener)
             : this(jsonRequest == null ? Method.GET : Method.POST, url, jsonRequest, listener, errorListener) { }
 
-
-
         public override Response ParseNetworkResponse(NetworkResponse response)
         {
-            throw new NotImplementedException();
+
         }
     }
 }

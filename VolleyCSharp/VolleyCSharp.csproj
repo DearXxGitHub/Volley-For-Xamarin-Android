@@ -91,6 +91,7 @@
     <Compile Include="ToolBox\JsonArrayRequest.cs" />
     <Compile Include="ToolBox\JsonObjectRequest.cs" />
     <Compile Include="ToolBox\JsonRequest.cs" />
+    <Compile Include="ToolBox\NetworkImageView.cs" />
     <Compile Include="ToolBox\NoCache.cs" />
     <Compile Include="ToolBox\PoolingByteArrayOutputStream.cs" />
     <Compile Include="ToolBox\RequestFuture.cs" />
