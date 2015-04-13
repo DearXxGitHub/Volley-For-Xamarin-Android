@@ -10,9 +10,15 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using System.IO;
+using System.Net;
+using VolleyCSharp.ToolBox;
 
-namespace VolleyCSharp.ToolBox
+namespace VolleyCSharp.NetCom
 {
+    /// <summary>
+    /// 封装底层网络
+    /// 原版本是提供在不同系统下使用不同网络实现的方式
+    /// </summary>
     public class BasicNetwork : INetwork
     {
         protected static bool DEBUG = VolleyLog.DEBUG;
@@ -32,12 +38,12 @@ namespace VolleyCSharp.ToolBox
 
         #region INetwork
 
-        public override NetworkResponse PerformRequest(Request request)
+        public NetworkResponse PerformRequest(Request request)
         {
             long requestStart = SystemClock.ElapsedRealtime();
             while (true)
             {
-                Org.Apache.Http.IHttpResponse httpResponse = null;
+                HttpWebResponse httpResponse = null;
                 byte[] responseContents = null;
                 Dictionary<String,String> responseHeaders = null;
                 try
@@ -45,36 +51,36 @@ namespace VolleyCSharp.ToolBox
                     Dictionary<String, String> headers = new Dictionary<string, string>();
                     AddCacheHeaders(headers, request.CacheEntry);
                     httpResponse = mHttpStack.PerformRequest(request, headers);
-                    Org.Apache.Http.IStatusLine statusLine = httpResponse.StatusLine;
-                    int statusCode = statusLine.StatusCode;
+                    var statusCode = httpResponse.StatusCode;
 
-                    responseHeaders = ConvertHeaders(httpResponse.GetAllHeaders());
+                    responseHeaders = ConvertHeaders(httpResponse.Headers);
 
-                    if (statusCode == Org.Apache.Http.HttpStatus.ScNotModified)
+                    if (statusCode == HttpStatusCode.NotModified)
                     {
                         Entry entry = request.CacheEntry;
                         if (entry == null)
                         {
-                            return new NetworkResponse(Org.Apache.Http.HttpStatus.ScNotModified, null,
+                            return new NetworkResponse(HttpStatusCode.NotModified, null,
                                 responseHeaders, true,
                                 SystemClock.ElapsedRealtime() - requestStart);
                         }
 
                         entry.ResponseHeaders = entry.ResponseHeaders.Intersect(responseHeaders).ToDictionary(x => x.Key, x => x.Value);
-                        return new NetworkResponse(Org.Apache.Http.HttpStatus.ScNotModified, entry.Data,
+                        return new NetworkResponse(HttpStatusCode.NotModified, entry.Data,
                             entry.ResponseHeaders, true,
                             SystemClock.ElapsedRealtime() - requestStart);
                     }
 
-                    if (statusCode == Org.Apache.Http.HttpStatus.ScMovedPermanently || statusCode == Org.Apache.Http.HttpStatus.ScMovedTemporarily)
+                    if (statusCode == HttpStatusCode.MovedPermanently || statusCode == HttpStatusCode.Moved)
                     {
                         String newUrl = responseHeaders["Location"];
                         request.SetRedirectUrl(newUrl);
                     }
 
-                    if (httpResponse.Entity != null)
+                    Stream output = httpResponse.GetResponseStream();
+                    if (output != null)
                     {
-                        responseContents = EntryToBytes(httpResponse.Entity);
+                        responseContents = EntityToBytes(output);
                     }
                     else
                     {
@@ -82,14 +88,18 @@ namespace VolleyCSharp.ToolBox
                     }
 
                     long requestLifetime = SystemClock.ElapsedRealtime() - requestStart;
-                    LogSlowRequests(requestLifetime, requestLifetime, responseContents, statusLine);
+                    LogSlowRequests(requestLifetime, request, responseContents, statusCode);
 
-                    if (statusCode < 200 || statusCode > 299)
+                    if (statusCode < HttpStatusCode.OK || (int)statusCode > 299)
                     {
                         throw new IOException();
                     }
                     return new NetworkResponse(statusCode, responseContents, responseHeaders, false,
                         SystemClock.ElapsedRealtime() - requestStart);
+                }
+                catch (WebException ex)
+                {
+
                 }
                 catch (Java.Net.SocketTimeoutException)
                 {
@@ -105,17 +115,17 @@ namespace VolleyCSharp.ToolBox
                 }
                 catch (Java.IO.IOException e)
                 {
-                    int statusCode = 0;
+                    HttpStatusCode statusCode = 0;
                     NetworkResponse networkResponse = null;
                     if (httpResponse != null)
                     {
-                        statusCode = httpResponse.StatusLine.StatusCode;
+                        statusCode = httpResponse.StatusCode;
                     }
                     else
                     {
                         throw new NoConnectionError(e);
                     }
-                    if (statusCode == Org.Apache.Http.HttpStatus.ScMovedPermanently)
+                    if (statusCode == HttpStatusCode.MovedPermanently)
                     {
                         VolleyLog.E("Request at {0} has been redirected to {1}", request.OriginUrl, request.Url);
                     }
@@ -127,11 +137,11 @@ namespace VolleyCSharp.ToolBox
                     {
                         networkResponse = new NetworkResponse(statusCode, responseContents,
                             responseHeaders, false, SystemClock.ElapsedRealtime() - requestStart);
-                        if (statusCode == Org.Apache.Http.HttpStatus.ScUnauthorized || statusCode == Org.Apache.Http.HttpStatus.ScForbidden)
+                        if (statusCode == HttpStatusCode.Unauthorized || statusCode == HttpStatusCode.Forbidden)
                         {
                             AttempRetryOnException("auth", request, new AuthFailureError());
                         }
-                        else if (statusCode == Org.Apache.Http.HttpStatus.ScMovedPermanently || statusCode == Org.Apache.Http.HttpStatus.ScMovedTemporarily)
+                        else if (statusCode == HttpStatusCode.MovedPermanently || statusCode == HttpStatusCode.Moved)
                         {
                             AttempRetryOnException("redirect", request, new AuthFailureError(networkResponse));
                         }
@@ -150,13 +160,13 @@ namespace VolleyCSharp.ToolBox
 
         #endregion
 
-        private void LogSlowRequests(long requestLifetime, Request request, byte[] responseContents, Org.Apache.Http.IStatusLine statusLine)
+        private void LogSlowRequests(long requestLifetime, Request request, byte[] responseContents, HttpStatusCode statusCode)
         {
             if (DEBUG || requestLifetime > SLOW_REQUEST_THRESHOLD_MS)
             {
-                VolleyLog.D("HTTP response for request=<{0}> [lifetime={1}],[size={2}], [rc={3}],[retryCount={4}]", requestLifetime, requestLifetime, 
+                VolleyLog.D("HTTP response for request=<{0}> [lifetime={1}],[size={2}], [rc={3}],[retryCount={4}]", requestLifetime, requestLifetime,
                     responseContents != null ? responseContents.Length.ToString() : "null",
-                    statusLine.StatusCode, request.GetRetryPolicy().CurrentRetryCount);
+                    statusCode, request.GetRetryPolicy().CurrentRetryCount);
             }
         }
 
@@ -202,9 +212,27 @@ namespace VolleyCSharp.ToolBox
             VolleyLog.V("HTTP ERROR({0}) {1} ms to fetch {2}", what, (now - start), url);
         }
 
-        private byte[] EntityToBytes(Org.Apache.Http.IHttpEntity entity)
+        /// <summary>
+        /// 将流转换成字节
+        /// </summary>
+        private byte[] EntityToBytes(Stream entity)
         {
-            StreamWriter bytes = new StreamWriter(mPool
+            byte[] buffer = new byte[entity.Length];
+            entity.Read(buffer, 0, buffer.Length);
+            return buffer;
+        }
+
+        /// <summary>
+        /// 将请求头转换成字典
+        /// </summary>
+        private Dictionary<String, String> ConvertHeaders(WebHeaderCollection headers)
+        {
+            Dictionary<String, String> dic = new Dictionary<string, string>();
+            foreach (var item in headers.AllKeys)
+            {
+                dic.Add(item, headers[item]);
+            }
+            return dic;
         }
     }
 }

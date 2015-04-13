@@ -14,7 +14,7 @@ using Android.Widget;
  * “—∫À µ
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.Delivery
 {
     public interface IResponseDelivery
     {

@@ -11,11 +11,14 @@ using Android.Views;
 using Android.Widget;
 
 /*
- * 已核实
+ * 15.3.13 改写
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.Delivery
 {
+    /// <summary>
+    /// 用来负责具体在主线程上执行的回调
+    /// </summary>
     public class ResponseDeliveryRunnable : Java.Lang.Object, Java.Lang.IRunnable
     {
         private Request mRequest;

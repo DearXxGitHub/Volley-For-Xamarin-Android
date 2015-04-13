@@ -11,11 +11,14 @@ using Android.Views;
 using Android.Widget;
 
 /*
- * 已核实
+ * 15.4.13 改写
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.Delivery
 {
+    /// <summary>
+    /// 用于切换到主线程执行回调
+    /// </summary>
     public class ExecutorDelivery : Java.Lang.Object, IResponseDelivery, Java.Util.Concurrent.IExecutor
     {
         private Java.Util.Concurrent.IExecutor mResponsePoster;

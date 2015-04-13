@@ -14,15 +14,15 @@ namespace VolleyCSharp.ToolBox
 {
     public class StringRequest : Request
     {
-        private IListener<String> mListener;
+        private IListener mListener;
 
-        public StringRequest(Method method, String url, IListener<String> listener, IErrorListener errorListener)
+        public StringRequest(Method method, String url, IListener listener, IErrorListener errorListener)
             : base(method, url, errorListener)
         {
             mListener = listener;
         }
 
-        public StringRequest(String url, IListener<String> listener, IErrorListener errorListener)
+        public StringRequest(String url, IListener listener, IErrorListener errorListener)
             : this(Method.GET, url, listener, errorListener) { }
 
         public override Response ParseNetworkResponse(NetworkResponse response)

@@ -9,9 +9,17 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using System.IO;
 
-namespace VolleyCSharp.ToolBox
+/*
+ * 15.4.13 改写
+ */
+
+namespace VolleyCSharp.CacheCom
 {
+    /// <summary>
+    /// 用来提供文件缓存的信息
+    /// </summary>
     public class CacheHeader
     {
         public long Size { get; set; }
@@ -37,25 +45,25 @@ namespace VolleyCSharp.ToolBox
             this.ResponseHeaders = entry.ResponseHeaders;
         }
 
-        public static CacheHeader ReadHeader(Java.IO.InputStream input)
+        public static CacheHeader ReadHeader(Stream input)
         {
             CacheHeader entry = new CacheHeader();
-            int magic = ReadInt(input);
-            if (magic != CACHE_MAGIC)
+            int magic = DiskBasedCache.ReadInt(input);
+            if (magic != DiskBasedCache.CACHE_MAGIC)
             {
                 throw new Java.IO.IOException();
             }
-            entry.Key = ReadString(input);
-            entry.ETag = ReadString(input);
-            if (entry.ETag == "")
+            entry.Key = DiskBasedCache.ReadString(input);
+            entry.ETag = DiskBasedCache.ReadString(input);
+            if (String.IsNullOrEmpty(entry.ETag))
             {
                 entry.ETag = null;
             }
-            entry.ServerDate = ReadLong(input);
-            entry.LastModified = ReadLong(input);
-            entry.Ttl = ReadLong(input);
-            entry.SoftTtl = ReadLong(input);
-            entry.ResponseHeaders = ReadStringStringMap(input);
+            entry.ServerDate = DiskBasedCache.ReadLong(input);
+            entry.LastModified = DiskBasedCache.ReadLong(input);
+            entry.Ttl = DiskBasedCache.ReadLong(input);
+            entry.SoftTtl = DiskBasedCache.ReadLong(input);
+            entry.ResponseHeaders = DiskBasedCache.ReadStringStringMap(input);
             return entry;
         }
 
@@ -72,22 +80,22 @@ namespace VolleyCSharp.ToolBox
             return e;
         }
 
-        public bool WriteHeader(Java.IO.OutputStream output)
+        public bool WriteHeader(Stream output)
         {
             try
             {
-                WriteInt(output, CACHE_MAGIC);
-                WriteString(output, Key);
-                WriteString(output, ETag == null ? "" : ETag);
-                WriteLong(output, ServerDate);
-                WriteLong(output, LastModified);
-                WriteLong(output, Ttl);
-                WriteLong(output, SoftTtl);
-                WriteStringStringMap(ResponseHeaders, output);
+                DiskBasedCache.WriteInt(output, DiskBasedCache.CACHE_MAGIC);
+                DiskBasedCache.WriteString(output, Key);
+                DiskBasedCache.WriteString(output, ETag == null ? "" : ETag);
+                DiskBasedCache.WriteLong(output, ServerDate);
+                DiskBasedCache.WriteLong(output, LastModified);
+                DiskBasedCache.WriteLong(output, Ttl);
+                DiskBasedCache.WriteLong(output, SoftTtl);
+                DiskBasedCache.WriteStringStringMap(ResponseHeaders, output);
                 output.Flush();
                 return true;
             }
-            catch (Java.IO.IOException e)
+            catch (IOException e)
             {
                 VolleyLog.D("{0}", e.ToString());
                 return false;

@@ -9,12 +9,14 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using VolleyCSharp.CacheCom;
+using VolleyCSharp.Delivery;
 
 /*
  * “—∫À µ
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.NetCom
 {
     public class NetworkDispatcher : Java.Lang.Thread
     {

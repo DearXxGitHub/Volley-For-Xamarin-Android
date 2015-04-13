@@ -19,7 +19,7 @@ namespace VolleyCSharp.ToolBox
         private Java.Lang.Object mResult;
         private VolleyError mException;
 
-        public static RequestFuture() { }
+        static RequestFuture() { }
 
         public void SetRequest(Request request)
         {
@@ -45,7 +45,7 @@ namespace VolleyCSharp.ToolBox
 
         public Java.Lang.Object Get(long timeout, Java.Util.Concurrent.TimeUnit unit)
         {
-            return DoGet((Java.Util.Concurrent.TimeUnit.Milliseconds.Convert(timeout,unit);
+            return DoGet((Java.Util.Concurrent.TimeUnit.Milliseconds.Convert(timeout, unit)));
         }
 
         public Java.Lang.Object Get()

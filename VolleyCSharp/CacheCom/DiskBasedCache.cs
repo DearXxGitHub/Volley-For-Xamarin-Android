@@ -9,27 +9,34 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Java.IO;
+using System.IO;
 
-namespace VolleyCSharp.ToolBox
+/*
+ * 15.1.13 改写
+ */
+
+namespace VolleyCSharp.CacheCom
 {
+    /// <summary>
+    /// 提供文件缓存
+    /// </summary>
     public class DiskBasedCache : ICache
     {
         private Dictionary<String, CacheHeader> mEntries = new Dictionary<string, CacheHeader>(16);
         private long mTotalSize = 0;
-        private File mRootDirectory;
+        private DirectoryInfo mRootDirectory;
         private int mMaxCacheSizeInBytes;
         public static int DEFAULT_DISK_USAGE_BYTES = 5 * 1024 * 1024;
         public static float HYSTERESIS_FACTOR = 0.9F;
         public static int CACHE_MAGIC = 0x20150306;
 
-        public DiskBasedCache(File rootDirectory, int maxCacheSizeInBytes)
+        public DiskBasedCache(DirectoryInfo rootDirectory, int maxCacheSizeInBytes)
         {
             this.mRootDirectory = rootDirectory;
             this.mMaxCacheSizeInBytes = maxCacheSizeInBytes;
         }
 
-        public DiskBasedCache(File rootDirectory)
+        public DiskBasedCache(DirectoryInfo rootDirectory)
             : this(rootDirectory, DEFAULT_DISK_USAGE_BYTES) { }
 
         public Entry Get(string key)
@@ -43,34 +50,28 @@ namespace VolleyCSharp.ToolBox
                     return null;
                 }
 
-                File file = GetFileForKey(key);
-                CountingInputStream cis = null;
+                FileInfo file = GetFileForKey(key);
+                FileStream fs = null;
                 try
                 {
-                    cis = new CountingInputStream(new FileInputStream(file));
-                    CacheHeader.ReadHeader(cis);
-                    byte[] data = StreamToBytes(cis, file.Length - cis.BytesRead);
+                    fs = file.Open(FileMode.OpenOrCreate);
+                    CacheHeader.ReadHeader(fs);
+                    byte[] data = StreamToBytes(fs, (int)fs.Length);
                     return entry.ToCacheEntry(data);
                 }
-                catch (Java.IO.IOException e)
+                catch (IOException e)
                 {
-                    VolleyLog.D("{0}:{1}", file.AbsolutePath, e.ToString());
-                }
-                catch (Java.Lang.NegativeArraySizeException e)
-                {
-                    VolleyLog.D("{0}:{1}", file.AbsolutePath, e.ToString());
+                    VolleyLog.D("{0}:{1}", file.FullName, e.ToString());
                 }
                 finally
                 {
-                    if (cis != null)
+                    if (fs != null)
                     {
                         try
                         {
-                            cis.Close();
+                            fs.Close();
                         }
-                        catch (Java.IO.IOException ioe)
-                        {
-                        }
+                        catch (IOException) { }
                     }
                 }
                 return null;
@@ -82,28 +83,28 @@ namespace VolleyCSharp.ToolBox
             lock (this)
             {
                 PruneIfNeeded(entry.Data.Length);
-                File file = GetFileForKey(key);
+                var file = GetFileForKey(key);
                 try
                 {
-                    FileOutputStream fos = new FileOutputStream(file);
+                    var fos = file.Open(FileMode.OpenOrCreate);
                     CacheHeader e = new CacheHeader(key, entry);
                     bool success = e.WriteHeader(fos);
                     if (!success)
                     {
                         fos.Close();
-                        VolleyLog.D("Failed to write header for {0}", file.AbsolutePath);
-                        throw new Java.IO.IOException();
+                        VolleyLog.D("Failed to write header for {0}", file.FullName);
+                        throw new IOException();
                     }
-                    fos.Write(entry.Data);
+                    fos.Write(entry.Data, 0, entry.Data.Length);
                     fos.Close();
                     PutEntry(key, e);
                     return;
                 }
-                catch (Java.IO.IOException) { }
-                bool deleted = file.Delete();
-                if (!deleted)
+                catch (IOException) { }
+                file.Delete();
+                if (File.Exists(file.FullName))
                 {
-                    VolleyLog.D("Could not clean up file {0}", file.AbsolutePath);
+                    VolleyLog.D("Could not clean up file {0}", file.FullName);
                 }
             }
         }
@@ -112,31 +113,32 @@ namespace VolleyCSharp.ToolBox
         {
             lock (this)
             {
-                if (!mRootDirectory.Exists())
+                if (!mRootDirectory.Exists)
                 {
-                    if (!mRootDirectory.Mkdirs())
+                    mRootDirectory.Create();
+                    if (!mRootDirectory.Exists)
                     {
-                        VolleyLog.E("Unable to create cache dir {0}", mRootDirectory.AbsolutePath);
+                        VolleyLog.E("Unable to create cache dir {0}", mRootDirectory.FullName);
                     }
                     return;
                 }
 
-                File[] files = mRootDirectory.ListFiles();
+                FileInfo[] files = mRootDirectory.GetFiles();
                 if (files == null)
                 {
                     return;
                 }
-                foreach (File file in files)
+                foreach (FileInfo file in files)
                 {
-                    BufferedInputStream fis = null;
+                    FileStream fs = null;
                     try
                     {
-                        fis = new BufferedInputStream(new FileInputStream(file));
-                        CacheHeader entry = CacheHeader.ReadHeader(fis);
-                        entry.Size = file.Length();
+                        fs = file.Open(FileMode.OpenOrCreate);
+                        CacheHeader entry = CacheHeader.ReadHeader(fs);
+                        entry.Size = fs.Length;
                         PutEntry(entry.Key, entry);
                     }
-                    catch (Java.IO.IOException e)
+                    catch (IOException)
                     {
                         if (file != null)
                         {
@@ -147,12 +149,12 @@ namespace VolleyCSharp.ToolBox
                     {
                         try
                         {
-                            if (fis != null)
+                            if (fs != null)
                             {
-                                fis.Close();
+                                fs.Close();
                             }
                         }
-                        catch (Java.IO.IOException) { }
+                        catch (IOException) { }
                     }
                 }
             }
@@ -179,11 +181,12 @@ namespace VolleyCSharp.ToolBox
         {
             lock (this)
             {
-                bool deleted = GetFileForKey(key).Delete();
+                var fi = GetFileForKey(key);
+                fi.Delete();
                 RemoveEntry(key);
-                if (!deleted)
+                if (File.Exists(fi.FullName))
                 {
-                    VolleyLog.D("Could not delete cache entry for key={0},filename={1}", key, GetFilenameForKey(key));
+                    VolleyLog.D("Could not delete cache entry for key={0},filename={1}", key, fi.FullName);
                 }
             }
         }
@@ -192,10 +195,10 @@ namespace VolleyCSharp.ToolBox
         {
             lock (this)
             {
-                File[] files = mRootDirectory.ListFiles();
+                FileInfo[] files = mRootDirectory.GetFiles();
                 if (files != null)
                 {
-                    foreach (File file in files)
+                    foreach (FileInfo file in files)
                     {
                         file.Delete();
                     }
@@ -214,9 +217,10 @@ namespace VolleyCSharp.ToolBox
             return locakFilename;
         }
 
-        public File GetFileForKey(String key)
+        public FileInfo GetFileForKey(String key)
         {
-            return new File(mRootDirectory, GetFilenameForKey(key));
+            String filePath = mRootDirectory.FullName + "/" + GetFilenameForKey(key);
+            return new FileInfo(filePath);
         }
 
         private void PruneIfNeeded(int neededSpace)
@@ -238,8 +242,9 @@ namespace VolleyCSharp.ToolBox
             foreach (KeyValuePair<String, CacheHeader> pair in mEntries)
             {
                 CacheHeader e = pair.Value;
-                bool deleted = GetFileForKey(e.Key).Delete();
-                if (deleted)
+                var fi = GetFileForKey(e.Key);
+                fi.Delete();
+                if (!File.Exists(fi.FullName))
                 {
                     mTotalSize -= e.Size;
                 }
@@ -278,7 +283,20 @@ namespace VolleyCSharp.ToolBox
             mEntries.Add(key, entry);
         }
 
-        public static byte[] StreamToBytes(InputStream @in, int length)
+        private void RemoveEntry(String key)
+        {
+            CacheHeader entry = null;
+            mEntries.TryGetValue(key, out entry);
+            if (entry != null)
+            {
+                mTotalSize -= entry.Size;
+                mEntries.Remove(key);
+            }
+        }
+
+        #region 静态公共方法
+
+        public static byte[] StreamToBytes(Stream @in, int length)
         {
             byte[] bytes = new byte[length];
             int count, pos = 0;
@@ -288,107 +306,109 @@ namespace VolleyCSharp.ToolBox
             }
             if (pos != length)
             {
-                throw new Java.IO.IOException("Expected " + length + " bytes,read " + pos + " bytes");
+                throw new IOException("Expected " + length + " bytes,read " + pos + " bytes");
             }
             return bytes;
         }
 
-        public static int Read(InputStream @is)
+        public static int Read(Stream s)
         {
-            int b = @is.Read();
+            int b = s.ReadByte();
             if (b == -1)
             {
-                throw new Java.IO.EOFException();
+                throw new EndOfStreamException();
             }
             return b;
         }
 
-        public static void WriteInt(OutputStream os, int n)
+        public static void WriteInt(Stream s, int n)
         {
-            os.Write((n >> 0) & 0xff);
-            os.Write((n >> 8) & 0xff);
-            os.Write((n >> 16) & 0xff);
-            os.Write((n >> 24) & 0xff);
+            s.WriteByte(Convert.ToByte((n >> 0) & 0xff));
+            s.WriteByte(Convert.ToByte((n >> 8) & 0xff));
+            s.WriteByte(Convert.ToByte((n >> 16) & 0xff));
+            s.WriteByte(Convert.ToByte((n >> 24) & 0xff));
         }
 
-        public static int ReadInt(InputStream @is)
+        public static int ReadInt(Stream s)
         {
             int n = 0;
-            n |= (Read(@is) << 0);
-            n |= (Read(@is) << 8);
-            n |= (Read(@is) << 16);
-            n |= (Read(@is) << 24);
+            n |= (Read(s) << 0);
+            n |= (Read(s) << 8);
+            n |= (Read(s) << 16);
+            n |= (Read(s) << 24);
             return n;
         }
 
-        public static void WriteLong(OutputStream os, long n)
+        public static void WriteLong(Stream os, long n)
         {
-            os.Write((byte)(n >> 0));
-            os.Write((byte)(n >> 8));
-            os.Write((byte)(n >> 16));
-            os.Write((byte)(n >> 24));
-            os.Write((byte)(n >> 32));
-            os.Write((byte)(n >> 40));
-            os.Write((byte)(n >> 48));
-            os.Write((byte)(n >> 56));
+            os.WriteByte(Convert.ToByte(n >> 0));
+            os.WriteByte(Convert.ToByte(n >> 8));
+            os.WriteByte(Convert.ToByte(n >> 16));
+            os.WriteByte(Convert.ToByte(n >> 24));
+            os.WriteByte(Convert.ToByte(n >> 32));
+            os.WriteByte(Convert.ToByte(n >> 40));
+            os.WriteByte(Convert.ToByte(n >> 48));
+            os.WriteByte(Convert.ToByte(n >> 56));
         }
 
-        public static long ReadLong(InputStream @is)
+        public static long ReadLong(Stream s)
         {
             long n = 0;
-            n |= ((Read(@is) & 0xFFL) << 0);
-            n |= ((Read(@is) & 0xFFL) << 8);
-            n |= ((Read(@is) & 0xFFL) << 16);
-            n |= ((Read(@is) & 0xFFL) << 24);
-            n |= ((Read(@is) & 0xFFL) << 32);
-            n |= ((Read(@is) & 0xFFL) << 40);
-            n |= ((Read(@is) & 0xFFL) << 48);
-            n |= ((Read(@is) & 0xFFL) << 56);
+            n |= ((Read(s) & 0xFFL) << 0);
+            n |= ((Read(s) & 0xFFL) << 8);
+            n |= ((Read(s) & 0xFFL) << 16);
+            n |= ((Read(s) & 0xFFL) << 24);
+            n |= ((Read(s) & 0xFFL) << 32);
+            n |= ((Read(s) & 0xFFL) << 40);
+            n |= ((Read(s) & 0xFFL) << 48);
+            n |= ((Read(s) & 0xFFL) << 56);
             return n;
         }
 
-        public static void WriteString(OutputStream os, String s)
+        public static void WriteString(Stream s, String t)
         {
-            byte[] b = Encoding.UTF8.GetBytes(s);
-            WriteLong(os, b.Length);
-            os.Write(b, 0, b.Length);
+            byte[] b = Encoding.UTF8.GetBytes(t);
+            WriteLong(s, b.Length);
+            s.Write(b, 0, b.Length);
         }
 
-        public static String ReadString(InputStream @is)
+        public static String ReadString(Stream s)
         {
-            int n = (int)ReadLong(@is);
-            byte[] b = StreamToBytes(@is, n);
+            int n = (int)ReadLong(s);
+            byte[] b = StreamToBytes(s, n);
             return Encoding.UTF8.GetString(b);
         }
 
-        public static void WriteStringStringMap(Dictionary<String, String> map, OutputStream os)
+        public static void WriteStringStringMap(Dictionary<String, String> map, Stream s)
         {
             if (map != null)
             {
-                WriteInt(os, map.Count);
+                WriteInt(s, map.Count);
                 foreach (KeyValuePair<String, String> entry in map)
                 {
-                    WriteString(os, entry.Key);
-                    WriteString(os, entry.Value);
+                    WriteString(s, entry.Key);
+                    WriteString(s, entry.Value);
                 }
             }
             else
             {
-                WriteInt(os, 0);
+                WriteInt(s, 0);
             }
         }
 
-        public static Dictionary<String, String> ReadStringStringMap(InputStream @is)
+        public static Dictionary<String, String> ReadStringStringMap(Stream s)
         {
-            int size = ReadInt(@is);
+            int size = ReadInt(s);
             Dictionary<String, String> result = new Dictionary<string, string>(size);
             for (int i = 0; i < size; i++)
             {
-                String key = ReadString(@is);
-                String value = ReadString(@is);
+                String key = ReadString(s);
+                String value = ReadString(s);
                 result.Add(key, value);
             }
             return result;
         }
+
+        #endregion
     }
 }

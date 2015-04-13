@@ -10,13 +10,19 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Java.Util.Concurrent.Atomic;
+using VolleyCSharp.Delivery;
+using VolleyCSharp.CacheCom;
+using VolleyCSharp.NetCom;
 
 /*
- * 已核实
+ * 15.4.13 改写
  */
 
 namespace VolleyCSharp
 {
+    /// <summary>
+    /// 请求队列，用来启动缓存处理程序和多个网络处理程序用来处理请求
+    /// </summary>
     public class RequestQueue
     {
         private AtomicInteger mSequenceGenerator = new AtomicInteger();
@@ -51,6 +57,9 @@ namespace VolleyCSharp
         public RequestQueue(ICache cache, INetwork network)
             : this(cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE) { }
 
+        /// <summary>
+        /// 开始处理请求池
+        /// </summary>
         public void Start()
         {
             Stop();

@@ -9,6 +9,9 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using System.IO;
+using VolleyCSharp.NetCom;
+using VolleyCSharp.CacheCom;
 
 namespace VolleyCSharp.ToolBox
 {
@@ -18,7 +21,7 @@ namespace VolleyCSharp.ToolBox
 
         public static RequestQueue NewRequestQueue(Context context, IHttpStack stack, int maxDiskCacheBytes)
         {
-            Java.IO.File cacheDir = new Java.IO.File(context.CacheDir, DEFAULT_CACHE_DIR);
+            var cacheDir = Directory.CreateDirectory(context.CacheDir.Path + "/" + DEFAULT_CACHE_DIR);
             String userAgent = "volley/0";
             try
             {
@@ -30,14 +33,7 @@ namespace VolleyCSharp.ToolBox
 
             if (stack == null)
             {
-                if (Build.VERSION.SdkInt >= BuildVersionCodes.Gingerbread)
-                {
-                    stack = new HurlStack();
-                }
-                else
-                {
-                    stack = new HttpClientStack(Android.Net.Http.AndroidHttpClient.NewInstance(userAgent));
-                }
+                stack = new HttpClientStack();
             }
 
             INetwork network = new BasicNetwork(stack);

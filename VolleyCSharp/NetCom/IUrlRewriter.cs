@@ -11,13 +11,13 @@ using Android.Views;
 using Android.Widget;
 
 /*
- * ÒÑºËÊµ
+ * 15.4.13 ¸ÄÐ´
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.NetCom
 {
-    public interface INetwork
+    public interface IUrlRewriter
     {
-        NetworkResponse PerformRequest(Request request);
+        String RewriteUrl(String originalUrl);
     }
 }

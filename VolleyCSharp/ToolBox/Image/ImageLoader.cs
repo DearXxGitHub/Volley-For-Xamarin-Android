@@ -254,13 +254,20 @@ namespace VolleyCSharp.ToolBox
             public Action<String, VolleyError> OnErrorResponse;
             public String CacheKey { get; set; }
 
-            public void IErrorListener.OnErrorResponse(VolleyError error)
+            //public void OnErrorResponse(VolleyError error)
+            //{
+            //    if (OnErrorResponse != null)
+            //    {
+            //        OnErrorResponse(CacheKey, error);
+            //    }
+            //}
+
+            Action<VolleyError> IErrorListener.OnErrorResponse
             {
-                if (OnErrorResponse != null)
-                {
-                    OnErrorResponse(CacheKey, error);
-                }
+                get { throw new NotImplementedException(); }
             }
+
+            public event Action<VolleyError> ErrorResponse;
         }
     }
 }

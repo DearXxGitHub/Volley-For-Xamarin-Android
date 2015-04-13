@@ -9,13 +9,18 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using VolleyCSharp.Delivery;
 
 /*
- * 已核实
+ * 15.4.13 改写
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.CacheCom
 {
+    /// <summary>
+    /// 缓存处理程序
+    /// 用来处理存在于缓存中的请求，如果该请求不存在则转发到网络请求队列
+    /// </summary>
     public class CacheDispatcher : Java.Lang.Thread
     {
         private static bool DEBUG = VolleyLog.DEBUG;

@@ -10,10 +10,14 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 
-namespace VolleyCSharp.ToolBox
+/*
+ * 15.4.13 ¸ÄÐ´
+ */
+
+namespace VolleyCSharp.NetCom
 {
-    public interface IUrlRewriter
+    public interface INetwork
     {
-        String RewriteUrl(String originalUrl);
+        NetworkResponse PerformRequest(Request request);
     }
 }

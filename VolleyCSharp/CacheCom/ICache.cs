@@ -14,7 +14,7 @@ using Android.Widget;
  * “—∫À µ
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.CacheCom
 {
     public interface ICache
     {

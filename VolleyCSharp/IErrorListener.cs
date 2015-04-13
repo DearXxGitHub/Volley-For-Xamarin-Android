@@ -14,7 +14,7 @@ namespace VolleyCSharp
 {
     public interface IErrorListener
     {
-        Action<VolleyError> OnErrorResponse { get; private set; }
+        Action<VolleyError> OnErrorResponse { get; set; }
         event Action<VolleyError> ErrorResponse;
     }
 }
