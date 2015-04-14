@@ -16,7 +16,7 @@ using Android.Widget;
 
 namespace VolleyCSharp
 {
-    public class VolleyError : Java.Lang.Exception
+    public class VolleyError : Exception
     {
         public NetworkResponse networkResponse;
         private long networkTimeMs;
@@ -37,14 +37,14 @@ namespace VolleyCSharp
             networkResponse = null;
         }
 
-        public VolleyError(String exceptionMessage, Java.Lang.Throwable reason)
+        public VolleyError(String exceptionMessage, Exception reason)
             : base(exceptionMessage, reason)
         {
             networkResponse = null;
         }
 
-        public VolleyError(Java.Lang.Throwable cause)
-            : base(cause)
+        public VolleyError(Exception reason)
+            : base("", reason)
         {
             networkResponse = null;
         }

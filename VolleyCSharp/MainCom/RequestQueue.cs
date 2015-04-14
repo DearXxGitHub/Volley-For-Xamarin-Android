@@ -32,7 +32,7 @@ namespace VolleyCSharp
         private Queue<Request> mCacheQueue = new Queue<Request>();
         private Queue<Request> mNetworkQueue = new Queue<Request>();
 
-        private static int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
+        private static int DEFAULT_NETWORK_THREAD_POOL_SIZE = 1;
         private ICache mCache;
         private INetwork mNetwork;
 

@@ -40,7 +40,6 @@ namespace VolleyCSharp.NetCom
             Interrupt();
         }
 
-        [Android.Annotation.TargetApi(Value = (int)BuildVersionCodes.IceCreamSandwich)]
         private void AddTrafficStatsTag(Request request)
         {
             if (Build.VERSION.SdkInt >= BuildVersionCodes.IceCreamSandwich)
@@ -107,7 +106,7 @@ namespace VolleyCSharp.NetCom
                     volleyError.NetworkTimeMs = SystemClock.ElapsedRealtime() - startTimeMs;
                     ParseAndDeliverNetworkError(request, volleyError);
                 }
-                catch (Java.Lang.Exception e)
+                catch (Exception e)
                 {
                     VolleyLog.E(e, "Unhandled exception {0}", e.ToString());
                     VolleyError volleyError = new VolleyError(e);

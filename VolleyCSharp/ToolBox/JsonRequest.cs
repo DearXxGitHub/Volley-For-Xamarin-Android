@@ -9,30 +9,33 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Newtonsoft.Json;
 
 namespace VolleyCSharp.ToolBox
 {
-    public abstract class JsonRequest : Request
+    public abstract class JsonRequest<T, R> : Request
+        where R : class
+        where T : class
     {
         protected static String PROTOCOL_CHARSET = "utf-8";
         private static String PROTOCOL_CONTENT_TYPE = "application/json;charset=utf-8";
 
-        private IListener mListener;
-        private String mRequestBody;
+        private Action<R> mListener;
+        private T mRequestBody;
 
-        public JsonRequest(String url, String requestBody, IListener listener, IErrorListener errorListener)
+        public JsonRequest(String url, T requestBody, Action<R> listener, Action<VolleyError> errorListener)
             : this(Method.DEPRECATED_GET_OR_POST, url, requestBody, listener, errorListener) { }
 
-        public JsonRequest(Method method, String url, String requestBody, IListener listener, IErrorListener errorListener)
+        public JsonRequest(Method method, String url, T requestBody, Action<R> listener, Action<VolleyError> errorListener)
             : base(method, url, errorListener)
         {
             mListener = listener;
             mRequestBody = requestBody;
         }
 
-        public override void DeliverResponse(object response)
+        public override void DeliverResponse(String response)
         {
-            mListener.OnResponse(response);
+            mListener(JsonConvert.DeserializeObject<R>(response));
         }
 
         public abstract override Response ParseNetworkResponse(NetworkResponse response);
@@ -56,7 +59,7 @@ namespace VolleyCSharp.ToolBox
         {
             try
             {
-                return mRequestBody == null ? null : Encoding.UTF8.GetBytes(mRequestBody);
+                return mRequestBody == null ? null : Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(mRequestBody));
             }
             catch (Exception)
             {

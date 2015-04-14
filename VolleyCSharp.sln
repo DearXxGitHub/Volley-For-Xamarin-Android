@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VolleyCSharp", "VolleyCSharp\VolleyCSharp.csproj", "{587E0745-8B31-492F-A026-0B1DBA7CE3EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Demo\Demo.csproj", "{04F18A63-1B76-446A-8A5F-265059CC11BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,12 @@ Global
 		{587E0745-8B31-492F-A026-0B1DBA7CE3EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{587E0745-8B31-492F-A026-0B1DBA7CE3EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{587E0745-8B31-492F-A026-0B1DBA7CE3EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04F18A63-1B76-446A-8A5F-265059CC11BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04F18A63-1B76-446A-8A5F-265059CC11BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04F18A63-1B76-446A-8A5F-265059CC11BF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{04F18A63-1B76-446A-8A5F-265059CC11BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04F18A63-1B76-446A-8A5F-265059CC11BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04F18A63-1B76-446A-8A5F-265059CC11BF}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

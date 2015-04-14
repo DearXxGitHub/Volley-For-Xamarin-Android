@@ -99,13 +99,9 @@ namespace VolleyCSharp.NetCom
                 }
                 catch (WebException ex)
                 {
-
+                    throw new NetworkError(ex);
                 }
-                catch (Java.Net.SocketTimeoutException)
-                {
-                    AttempRetryOnException("socket", request, new TimeoutError());
-                }
-                catch (Org.Apache.Http.Conn.ConnectTimeoutException)
+                catch (TimeoutException)
                 {
                     AttempRetryOnException("connection", request, new TimeoutError());
                 }
@@ -113,7 +109,7 @@ namespace VolleyCSharp.NetCom
                 {
                     throw new Java.Lang.RuntimeException("Bad URL " + request.Url, e);
                 }
-                catch (Java.IO.IOException e)
+                catch (IOException e)
                 {
                     HttpStatusCode statusCode = 0;
                     NetworkResponse networkResponse = null;

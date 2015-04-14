@@ -40,7 +40,7 @@ namespace VolleyCSharp
         private String mRedirectUrl;
         private String mIdentifier;
         private int mDefaultTrafficStatsTag;
-        private IErrorListener mErrorListener;
+        private Action<VolleyError> mErrorListener;
         private int mSequence;
         private RequestQueue mRequestQueue;
         private bool mShouldCache = true;
@@ -52,10 +52,10 @@ namespace VolleyCSharp
         private Entry mCacheEntry = null;
         private object mTag;
 
-        public Request(String url, IErrorListener listener)
+        public Request(String url, Action<VolleyError> listener)
             : this(Method.DEPRECATED_GET_OR_POST, url, listener) { }
 
-        public Request(Method method, String url, IErrorListener listener)
+        public Request(Method method, String url, Action<VolleyError> listener)
         {
             this.mMethod = method;
             this.mUrl = url;
@@ -86,7 +86,7 @@ namespace VolleyCSharp
             }
         }
 
-        public IErrorListener ErrorListener
+        public Action<VolleyError> ErrorListener
         {
             get
             {
@@ -372,13 +372,13 @@ namespace VolleyCSharp
             return volleyError;
         }
 
-        public abstract void DeliverResponse(object response);
+        public abstract void DeliverResponse(String response);
 
         public void DeliverError(VolleyError error)
         {
             if (mErrorListener != null)
             {
-                mErrorListener.OnErrorResponse(error);
+                mErrorListener(error);
             }
         }
 

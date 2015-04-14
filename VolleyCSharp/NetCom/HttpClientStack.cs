@@ -72,7 +72,6 @@ namespace VolleyCSharp.NetCom
             webrequest.Accept = Accept;
             webrequest.UserAgent = UserAgent;
             webrequest.Timeout = request.GetTimeoutMs();
-            webrequest.ContinueTimeout = 5000;
             if (Cookie != null)
             {
                 webrequest.CookieContainer = Cookie;

@@ -21,7 +21,7 @@ namespace VolleyCSharp
         public NoConnectionError()
             : base() { }
 
-        public NoConnectionError(Java.Lang.Throwable reason)
+        public NoConnectionError(Exception reason)
             : base(reason) { }
     }
 }

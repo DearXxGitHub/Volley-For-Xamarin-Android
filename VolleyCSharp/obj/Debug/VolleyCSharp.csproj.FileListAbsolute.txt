@@ -10,15 +10,3 @@ E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\android\bin\VolleyCSharp.
 E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\res\values\strings.xml
 E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\R.cs.flag
 E:\Xamarim.Android\VolleyCSharp\VolleyCSharp\obj\Debug\uploadflags.txt
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\obj\Debug\VolleyCSharp.csprojResolveAssemblyReference.cache
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\obj\Debug\VolleyCSharp.dll
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\obj\Debug\VolleyCSharp.pdb
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\bin\Debug\VolleyCSharp.dll
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\bin\Debug\VolleyCSharp.pdb
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\bin\Debug\VolleyCSharp.dll.mdb
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\bin\Debug\VolleyCSharp.VolleyCSharp.apk
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\bin\Debug\VolleyCSharp.VolleyCSharp-Signed.apk
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\obj\Debug\android\bin\VolleyCSharp.VolleyCSharp.apk
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\obj\Debug\res\values\strings.xml
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\obj\Debug\R.cs.flag
-E:\Xamarim.Android\Volley\Volley-For-Xamarin-Android\VolleyCSharp\obj\Debug\uploadflags.txt

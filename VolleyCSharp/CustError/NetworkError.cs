@@ -21,7 +21,7 @@ namespace VolleyCSharp
         public NetworkError()
             : base() { }
 
-        public NetworkError(Java.Lang.Throwable cause)
+        public NetworkError(Exception cause)
             : base(cause) { }
 
         public NetworkError(NetworkResponse networkResponse)

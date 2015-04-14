@@ -49,6 +49,6 @@ namespace VolleyCSharp.ToolBox
             return null;
         }
 
-        public override void DeliverResponse(object response) { }
+        public override void DeliverResponse(String response) { }
     }
 }

@@ -57,7 +57,19 @@ namespace VolleyCSharp.CacheCom
             {
                 try
                 {
-                    Request request = mCacheQueue.Dequeue();
+                    Request request =null;
+                    try
+                    {
+                        request = mCacheQueue.Dequeue();
+                    }
+                    catch (Exception)
+                    {
+                        if (mQuit)
+                        {
+                            return;
+                        }
+                        continue;
+                    }
                     request.AddMarker("cache-queue-take");
 
                     if (request.IsCanceled)

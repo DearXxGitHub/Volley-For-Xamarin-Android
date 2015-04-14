@@ -18,7 +18,7 @@ namespace VolleyCSharp
 {
     public class Response
     {
-        public static Response Success(object result, Entry cacheEntry)
+        public static Response Success(String result, Entry cacheEntry)
         {
             return new Response(result, cacheEntry);
         }
@@ -28,7 +28,7 @@ namespace VolleyCSharp
             return new Response(error);
         }
 
-        public object Result { get; private set; }
+        public String Result { get; private set; }
         public Entry CacheEntry { get; private set; }
         public VolleyError MError { get; private set; }
         public bool Intermediate { get; set; }
@@ -41,7 +41,7 @@ namespace VolleyCSharp
             }
         }
 
-        private Response(object result, Entry cacheEntry)
+        private Response(String result, Entry cacheEntry)
         {
             this.Result = result;
             this.CacheEntry = cacheEntry;

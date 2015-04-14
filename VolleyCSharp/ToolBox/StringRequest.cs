@@ -14,15 +14,15 @@ namespace VolleyCSharp.ToolBox
 {
     public class StringRequest : Request
     {
-        private IListener mListener;
+        private Action<String> mListener;
 
-        public StringRequest(Method method, String url, IListener listener, IErrorListener errorListener)
+        public StringRequest(Method method, String url, Action<String> listener, Action<VolleyError> errorListener)
             : base(method, url, errorListener)
         {
             mListener = listener;
         }
 
-        public StringRequest(String url, IListener listener, IErrorListener errorListener)
+        public StringRequest(String url, Action<String> listener, Action<VolleyError> errorListener)
             : this(Method.GET, url, listener, errorListener) { }
 
         public override Response ParseNetworkResponse(NetworkResponse response)
@@ -36,12 +36,12 @@ namespace VolleyCSharp.ToolBox
             {
                 parsed = new Java.Lang.String(response.Data);
             }
-            return Response.Success(parsed, HttpHeaderParser.ParseCacheHeaders(response));
+            return Response.Success(parsed.ToString(), HttpHeaderParser.ParseCacheHeaders(response));
         }
 
-        public override void DeliverResponse(object response)
+        public override void DeliverResponse(String response)
         {
-            mListener.OnResponse(response as string);
+            mListener(response);
         }
     }
 }

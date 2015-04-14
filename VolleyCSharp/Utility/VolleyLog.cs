@@ -74,9 +74,9 @@ namespace VolleyCSharp
             Log.Error(TAG, BuildMessage(format, args));
         }
 
-        public static void E(Java.Lang.Throwable tr,String format,params object[] args)
+        public static void E(Exception tr,String format,params object[] args)
         {
-            Log.Error(TAG,tr,BuildMessage(format,args));
+            Log.Error(TAG,BuildMessage(format,args));
         }
 
         public static void WTF(String format, params object[] args)
@@ -84,9 +84,9 @@ namespace VolleyCSharp
             Log.Wtf(TAG, BuildMessage(format, args));
         }
 
-        public static void WTF(Java.Lang.Throwable tr, String format, params object[] args)
+        public static void WTF(Exception tr, String format, params object[] args)
         {
-            Log.Wtf(TAG, tr, BuildMessage(format, args));
+            Log.Wtf(TAG, BuildMessage(format, args));
         }
     }
 }
