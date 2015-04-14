@@ -34,7 +34,7 @@ namespace VolleyCSharp.Delivery
 
         public void Run()
         {
-            if (mRequest.IsCanceled)
+            if (mResponse.IsSuccess)
             {
                 mRequest.DeliverResponse(mResponse.Result);
             }

@@ -18,17 +18,21 @@ namespace Demo
         {
             base.OnCreate(bundle);
             SetContentView(Resource.Layout.Main);
+
             var requestQueue = Volley.NewRequestQueue(this);
-            var stringRequest = new StringRequest("http://www.baidu.com", (x) =>
-            {
-                Log.Debug("Test", "String Request is Finished");
-            },
-            (x) =>
-            {
-                Log.Debug("Test", x.ToString());
-            });
-            requestQueue.Add(stringRequest);
             requestQueue.Start();
+            FindViewById<Button>(Resource.Id.btnString).Click += (e, s) =>
+            {
+                var stringRequest = new StringRequest("http://item.taobao.com/item.htm?spm=a230r.1.14.9.waPbtr&id=41701482681&ns=1&abbucket=9#detail", (x) =>
+                {
+                    Log.Debug("Test", "String Request is Finished");
+                },
+                (x) =>
+                {
+                    Log.Debug("Test", x.ToString());
+                });
+                requestQueue.Add(stringRequest);
+            };
         }
     }
 }

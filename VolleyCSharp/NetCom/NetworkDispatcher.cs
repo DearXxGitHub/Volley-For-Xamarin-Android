@@ -11,6 +11,7 @@ using Android.Views;
 using Android.Widget;
 using VolleyCSharp.CacheCom;
 using VolleyCSharp.Delivery;
+using System.Collections.Concurrent;
 
 /*
  * “—∫À µ
@@ -20,13 +21,13 @@ namespace VolleyCSharp.NetCom
 {
     public class NetworkDispatcher : Java.Lang.Thread
     {
-        private Queue<Request> mQueue;
+        private ConcurrentQueue<Request> mQueue;
         private INetwork mNetwork;
         private ICache mCache;
         private IResponseDelivery mDelivery;
         private volatile bool mQuit = false;
 
-        public NetworkDispatcher(Queue<Request> queue, INetwork network, ICache cache, IResponseDelivery delivery)
+        public NetworkDispatcher(ConcurrentQueue<Request> queue, INetwork network, ICache cache, IResponseDelivery delivery)
         {
             this.mQueue = queue;
             this.mNetwork = network;
@@ -55,11 +56,7 @@ namespace VolleyCSharp.NetCom
             {
                 long startTimeMs = SystemClock.ElapsedRealtime();
                 Request request;
-                try
-                {
-                    request = mQueue.Dequeue();
-                }
-                catch (Exception)
+                if (!mQueue.TryDequeue(out request))
                 {
                     if (mQuit)
                     {

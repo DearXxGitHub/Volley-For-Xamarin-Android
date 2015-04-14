@@ -10,6 +10,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using VolleyCSharp.Delivery;
+using System.Collections.Concurrent;
 
 /*
  * 15.4.13 ¸ÄÐ´
@@ -24,13 +25,13 @@ namespace VolleyCSharp.CacheCom
     public class CacheDispatcher : Java.Lang.Thread
     {
         private static bool DEBUG = VolleyLog.DEBUG;
-        private Queue<Request> mCacheQueue;
-        private Queue<Request> mNetworkQueue;
+        private ConcurrentQueue<Request> mCacheQueue;
+        private ConcurrentQueue<Request> mNetworkQueue;
         private ICache mCache;
         private IResponseDelivery mDelivery;
         private volatile bool mQuit = false;
 
-        public CacheDispatcher(Queue<Request> cacheQueue, Queue<Request> networkQueue, ICache cache, IResponseDelivery delivery)
+        public CacheDispatcher(ConcurrentQueue<Request> cacheQueue, ConcurrentQueue<Request> networkQueue, ICache cache, IResponseDelivery delivery)
         {
             this.mCacheQueue = cacheQueue;
             this.mNetworkQueue = networkQueue;
@@ -58,11 +59,7 @@ namespace VolleyCSharp.CacheCom
                 try
                 {
                     Request request =null;
-                    try
-                    {
-                        request = mCacheQueue.Dequeue();
-                    }
-                    catch (Exception)
+                    if (!mCacheQueue.TryDequeue(out request))
                     {
                         if (mQuit)
                         {

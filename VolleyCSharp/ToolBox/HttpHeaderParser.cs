@@ -115,7 +115,7 @@ namespace VolleyCSharp.ToolBox
         {
             try
             {
-                return new DateTime(long.Parse(dateStr)).Ticks;
+                return DateTime.Parse(dateStr).Ticks;
             }
             catch (Exception)
             {

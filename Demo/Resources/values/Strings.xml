@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="Hello">Hello World, Click Me!</string>
-    <string name="ApplicationName">Demo</string>
+  <string name="TestString">测试字符串请求</string>
+  <string name="TestJson">测试Json请求</string>
+  <string name="ApplicationName">Demo</string>
 </resources>

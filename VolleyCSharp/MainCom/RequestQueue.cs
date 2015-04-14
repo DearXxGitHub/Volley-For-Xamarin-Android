@@ -13,6 +13,7 @@ using Java.Util.Concurrent.Atomic;
 using VolleyCSharp.Delivery;
 using VolleyCSharp.CacheCom;
 using VolleyCSharp.NetCom;
+using System.Collections.Concurrent;
 
 /*
  * 15.4.13 ¸ÄÐ´
@@ -29,8 +30,8 @@ namespace VolleyCSharp
         private Dictionary<String, Queue<Request>> mWaitingRequests = new Dictionary<string, Queue<Request>>();
         private HashSet<Request> mCurrentRequests = new HashSet<Request>();
 
-        private Queue<Request> mCacheQueue = new Queue<Request>();
-        private Queue<Request> mNetworkQueue = new Queue<Request>();
+        private ConcurrentQueue<Request> mCacheQueue = new ConcurrentQueue<Request>();
+        private ConcurrentQueue<Request> mNetworkQueue = new ConcurrentQueue<Request>();
 
         private static int DEFAULT_NETWORK_THREAD_POOL_SIZE = 1;
         private ICache mCache;
@@ -161,7 +162,6 @@ namespace VolleyCSharp
                         stagedRequests = new Queue<Request>();
                     }
                     stagedRequests.Enqueue(request);
-                    mWaitingRequests.Add(cacheKey, stagedRequests);
                     if (VolleyLog.DEBUG)
                     {
                         VolleyLog.V("Request for cacheKey={0} is in flight,putting on hold.", cacheKey);

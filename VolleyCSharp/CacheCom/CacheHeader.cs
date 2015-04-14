@@ -95,7 +95,7 @@ namespace VolleyCSharp.CacheCom
                 output.Flush();
                 return true;
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 VolleyLog.D("{0}", e.ToString());
                 return false;

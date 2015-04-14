@@ -178,11 +178,25 @@ namespace VolleyCSharp.NetCom
             var httpRequest = CreateHttpRequest(request);
             foreach (KeyValuePair<String, String> head in additionalHeaders)
             {
-                httpRequest.Headers.Add(head.Key, head.Value);
+                try
+                {
+                    httpRequest.Headers.Add(head.Key, head.Value);
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
             }
             foreach (KeyValuePair<String, String> head in request.GetHeaders())
             {
-                httpRequest.Headers.Add(head.Key, head.Value);
+                try
+                {
+                    httpRequest.Headers.Add(head.Key, head.Value);
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
             }
             return (HttpWebResponse)httpRequest.GetResponse();
         }

@@ -55,22 +55,6 @@ namespace VolleyCSharp.NetCom
 
                     responseHeaders = ConvertHeaders(httpResponse.Headers);
 
-                    if (statusCode == HttpStatusCode.NotModified)
-                    {
-                        Entry entry = request.CacheEntry;
-                        if (entry == null)
-                        {
-                            return new NetworkResponse(HttpStatusCode.NotModified, null,
-                                responseHeaders, true,
-                                SystemClock.ElapsedRealtime() - requestStart);
-                        }
-
-                        entry.ResponseHeaders = entry.ResponseHeaders.Intersect(responseHeaders).ToDictionary(x => x.Key, x => x.Value);
-                        return new NetworkResponse(HttpStatusCode.NotModified, entry.Data,
-                            entry.ResponseHeaders, true,
-                            SystemClock.ElapsedRealtime() - requestStart);
-                    }
-
                     if (statusCode == HttpStatusCode.MovedPermanently || statusCode == HttpStatusCode.Moved)
                     {
                         String newUrl = responseHeaders["Location"];
@@ -99,6 +83,25 @@ namespace VolleyCSharp.NetCom
                 }
                 catch (WebException ex)
                 {
+                    if (ex.Response != null)
+                    {
+                        var result = ex.Response as HttpWebResponse;
+                        if (result.StatusCode == HttpStatusCode.NotModified)
+                        {
+                            Entry entry = request.CacheEntry;
+                            if (entry == null)
+                            {
+                                return new NetworkResponse(HttpStatusCode.NotModified, null,
+                                    responseHeaders, true,
+                                    SystemClock.ElapsedRealtime() - requestStart);
+                            }
+
+                            //entry.ResponseHeaders = entry.ResponseHeaders.Intersect(responseHeaders).ToDictionary(x => x.Key, x => x.Value);
+                            return new NetworkResponse(HttpStatusCode.NotModified, entry.Data,
+                                entry.ResponseHeaders, true,
+                                SystemClock.ElapsedRealtime() - requestStart);
+                        }
+                    }
                     throw new NetworkError(ex);
                 }
                 catch (TimeoutException)
@@ -213,7 +216,8 @@ namespace VolleyCSharp.NetCom
         /// </summary>
         private byte[] EntityToBytes(Stream entity)
         {
-            byte[] buffer = new byte[entity.Length];
+            StreamReader sr = new StreamReader(entity);
+            byte[] buffer = Encoding.UTF8.GetBytes(sr.ReadToEnd());
             entity.Read(buffer, 0, buffer.Length);
             return buffer;
         }

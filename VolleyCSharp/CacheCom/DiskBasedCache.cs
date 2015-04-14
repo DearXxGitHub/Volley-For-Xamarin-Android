@@ -56,7 +56,7 @@ namespace VolleyCSharp.CacheCom
                 {
                     fs = file.Open(FileMode.OpenOrCreate);
                     CacheHeader.ReadHeader(fs);
-                    byte[] data = StreamToBytes(fs, (int)fs.Length);
+                    byte[] data = StreamToBytes(fs, (int)(fs.Length - fs.Position));
                     return entry.ToCacheEntry(data);
                 }
                 catch (IOException e)
@@ -280,7 +280,14 @@ namespace VolleyCSharp.CacheCom
                 CacheHeader oldEntry = mEntries[key];
                 mTotalSize += (entry.Size - oldEntry.Size);
             }
-            mEntries.Add(key, entry);
+            if (mEntries.ContainsKey(key))
+            {
+                mEntries[key] = entry;
+            }
+            else
+            {
+                mEntries.Add(key, entry);
+            }
         }
 
         private void RemoveEntry(String key)
@@ -296,11 +303,11 @@ namespace VolleyCSharp.CacheCom
 
         #region 静态公共方法
 
-        public static byte[] StreamToBytes(Stream @in, int length)
+        public static byte[] StreamToBytes(Stream s, int length)
         {
             byte[] bytes = new byte[length];
             int count, pos = 0;
-            while (pos < length && ((count = @in.Read(bytes, pos, length - pos)) != -1))
+            while (pos < length && ((count = s.Read(bytes, pos, length - pos)) != -1))
             {
                 pos += count;
             }
@@ -341,14 +348,14 @@ namespace VolleyCSharp.CacheCom
 
         public static void WriteLong(Stream os, long n)
         {
-            os.WriteByte(Convert.ToByte(n >> 0));
-            os.WriteByte(Convert.ToByte(n >> 8));
-            os.WriteByte(Convert.ToByte(n >> 16));
-            os.WriteByte(Convert.ToByte(n >> 24));
-            os.WriteByte(Convert.ToByte(n >> 32));
-            os.WriteByte(Convert.ToByte(n >> 40));
-            os.WriteByte(Convert.ToByte(n >> 48));
-            os.WriteByte(Convert.ToByte(n >> 56));
+            os.WriteByte((byte)(n >> 0));
+            os.WriteByte((byte)(n >> 8));
+            os.WriteByte((byte)(n >> 16));
+            os.WriteByte((byte)(n >> 24));
+            os.WriteByte((byte)(n >> 32));
+            os.WriteByte((byte)(n >> 40));
+            os.WriteByte((byte)(n >> 48));
+            os.WriteByte((byte)(n >> 56));
         }
 
         public static long ReadLong(Stream s)
