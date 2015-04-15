@@ -1,11 +1,11 @@
 # Volley-For-Xamarin-Android
-<p>&nbsp;&nbsp;本库将Google下著名的网络方面的库Volley改写成Xamarin.Android版。</p>
+<p>&nbsp;&nbsp;将Google下著名的网络方面的库Volley改写成Xamarin.Android版。</p>
 
 <h1><a href="https://github.com/mcxiaoke/android-volley" target="_blank">在此感谢原作者mcxiaoke</a></h1>
 
 #改动的地方
 <h3>1.将原本使用Listen和ErrorListen接口进行回调的方式改成委托方式</h3>
-<h5>比如下面这种方式示例话StringRequest类:</h5>
+<h5>比如下面这种方式示例化StringRequest类:</h5>
 <pre>
                 var stringRequest = new StringRequest("http://www.baidu.com", (x) =>
                 {
