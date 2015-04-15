@@ -1,7 +1,7 @@
 # Volley-For-Xamarin-Android
 <p>&nbsp;&nbsp;本库将Google下著名的网络方面的库Volley改写成Xamarin.Android版。</p>
 
-#<a href="https://github.com/mcxiaoke/android-volley" target="_blank">在此感谢原作者mcxiaoke</a>
+<h1><a href="https://github.com/mcxiaoke/android-volley" target="_blank">在此感谢原作者mcxiaoke</a></h1>
 
 #改动的地方
 <h3>1.将原本使用Listen和ErrorListen接口进行回调的方式改成委托方式</h3>
@@ -99,7 +99,7 @@ var webrequest = (HttpWebRequest)WebRequest.Create(request.Url);
  <li>v1.0 2015-4-15<br/>
   <ol>
    <li>通过String与Json测试</li>
-   <li><暂时未加入ImageRequest/li>
+   <li><暂时未加入ImageRequest</li>
  </ol>
  </li>
 </ul>
