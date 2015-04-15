@@ -11,11 +11,20 @@ using Android.Views;
 using Android.Widget;
 
 /*
- * 已核实
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
 
 namespace VolleyCSharp
 {
+    /// <summary>
+    /// 重试策略实现类
+    /// </summary>
     public class DefaultRetryPolicy : IRetryPolicy
     {
         private int mCurrentTimeoutMs;
@@ -23,9 +32,9 @@ namespace VolleyCSharp
         private int mMaxNumRetries;
         private float mBackoffMultiplier;
 
-        public static int DEFAULT_TIMEOUT_MS = 2500;
-        public static int DEFAULT_MAX_RETRIES = 0;
-        public static float DEFAULT_BACKOFF_MULT = 1f;
+        public const int DEFAULT_TIMEOUT_MS = 2500;
+        public const int DEFAULT_MAX_RETRIES = 0;
+        public const float DEFAULT_BACKOFF_MULT = 1f;
 
         public DefaultRetryPolicy()
             : this(DEFAULT_TIMEOUT_MS, DEFAULT_MAX_RETRIES, DEFAULT_BACKOFF_MULT) { }

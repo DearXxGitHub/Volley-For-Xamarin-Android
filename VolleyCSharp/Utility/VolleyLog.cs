@@ -13,11 +13,20 @@ using Android.Util;
 using System.Threading;
 
 /*
- * 15.4.15 改写
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
 
 namespace VolleyCSharp.Utility
 {
+    /// <summary>
+    /// 日志输出工具类
+    /// </summary>
     public class VolleyLog : Java.Lang.Object
     {
         public static String TAG = "Volley";

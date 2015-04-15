@@ -41,15 +41,10 @@ namespace VolleyCSharp.NetCom
         private static int SLOW_REQUEST_THRESHOLD_MS = 3000;
         private static int DEFAULT_POOL_SIZE = 4096;
         protected IHttpStack mHttpStack;
-        protected ByteArrayPool mPool;
 
         public BasicNetwork(IHttpStack httpStack)
-            : this(httpStack, new ByteArrayPool(DEFAULT_POOL_SIZE)) { }
-
-        public BasicNetwork(IHttpStack httpStack, ByteArrayPool pool)
         {
             this.mHttpStack = httpStack;
-            this.mPool = pool;
         }
 
         #region INetwork

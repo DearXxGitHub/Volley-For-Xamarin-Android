@@ -23,7 +23,7 @@ namespace Demo
             requestQueue.Start();
             FindViewById<Button>(Resource.Id.btnString).Click += (e, s) =>
             {
-                var stringRequest = new StringRequest("http://item.taobao.com/item.htm?spm=a230r.1.14.9.waPbtr&id=41701482681&ns=1&abbucket=9#detail", (x) =>
+                var stringRequest = new StringRequest("http://www.baidu.com", (x) =>
                 {
                     Log.Debug("Test", "String Request is Finished");
                 },
@@ -33,6 +33,29 @@ namespace Demo
                 });
                 requestQueue.Add(stringRequest);
             };
+
+			FindViewById<Button> (Resource.Id.btnJson).Click += (sender, e) => 
+			{
+                //该测试需要开发人员搭建一个简单的web端
+				var jsonRequest = new JsonRequest<Test,Test>("http://172.16.101.20:8080/MUser/PostTest",new Test{
+					UName = "Test",
+					UPass = "Test"
+				},(x)=>
+					{
+						Log.Debug("Test",x.UName);
+					},
+					(x)=>
+					{
+						Log.Debug("Test",x.ToString());
+					});
+				requestQueue.Add(jsonRequest);
+			};
         }
     }
+
+	public class Test
+	{
+		public String UName{get;set;}
+		public String UPass{get;set;}
+	}
 }

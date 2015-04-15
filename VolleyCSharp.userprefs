@@ -1,6 +1,10 @@
 ﻿<Properties StartupItem="Demo\Demo.csproj">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Android.AVD_for_4_7in_WXGA" />
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Android.7&amp;2a42f29b&amp;0&amp;0001" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="VolleyCSharp\ToolBox\JsonRequest.cs">
+    <Files>
+      <File FileName="VolleyCSharp\ToolBox\JsonRequest.cs" Line="40" Column="37" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>

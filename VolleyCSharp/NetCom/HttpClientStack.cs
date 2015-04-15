@@ -12,11 +12,17 @@ using Android.Widget;
 using System.Net;
 using System.IO;
 using VolleyCSharp.ToolBox;
+using VolleyCSharp.MainCom;
 
 /*
- * 15.4.13 改写
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
-using VolleyCSharp.MainCom;
 
 namespace VolleyCSharp.NetCom
 {
@@ -37,8 +43,8 @@ namespace VolleyCSharp.NetCom
             public const String PATCH = "PATCH";
         }
 
-        protected String UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36";
-        protected String Accept = "text/html,application/xhtml+xml,text/json;q=0.9,image/webp,*/*;q=0.8";
+        protected const String UserAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36";
+        protected const String Accept = "text/html,application/xhtml+xml,text/json;q=0.9,image/webp,*/*;q=0.8";
 
         protected static CookieContainer Cookie { get; set; }
 
@@ -146,7 +152,7 @@ namespace VolleyCSharp.NetCom
         }
 
         /// <summary>
-        /// 写入数据
+        /// 写入需要传递的数据
         /// </summary>
         public void WriteData(HttpWebRequest request, byte[] postBody)
         {
@@ -159,12 +165,14 @@ namespace VolleyCSharp.NetCom
         }
 
         /// <summary>
-        /// 请求前
+        /// 请求前进行的操作
         /// </summary>
         protected virtual void OnPrepareRequest(HttpWebRequest request)
         {
 
         }
+
+        #region IHttpStack
 
         public HttpWebResponse PerformRequest(Request request, Dictionary<string, string> additionalHeaders)
         {
@@ -201,5 +209,7 @@ namespace VolleyCSharp.NetCom
             }
             return (HttpWebResponse)httpRequest.GetResponse();
         }
+
+        #endregion
     }
 }

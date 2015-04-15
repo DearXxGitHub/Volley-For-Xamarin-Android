@@ -9,15 +9,24 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-
-/*
- * 15.4.15 改写
- */
 using VolleyCSharp.MainCom;
 using VolleyCSharp.Utility;
 
+/*
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
+ */
+
 namespace VolleyCSharp.ToolBox
 {
+    /// <summary>
+    /// 字符串请求
+    /// </summary>
     public class StringRequest : Request
     {
         private Action<String> mListener;

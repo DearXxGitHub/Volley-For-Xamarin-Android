@@ -258,7 +258,7 @@ namespace VolleyCSharp.MainCom
                 }
                 return new Java.Lang.String(encoderParams).GetBytes(paramsEncoding);
             }
-            catch (Java.IO.UnsupportedEncodingException uee)
+            catch (Java.IO.UnsupportedEncodingException)
             {
                 throw new InvalidOperationException("Encoding not supported:" + paramsEncoding);
             }

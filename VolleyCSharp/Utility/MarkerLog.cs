@@ -11,11 +11,20 @@ using Android.Views;
 using Android.Widget;
 
 /*
- * 15.4.15 改写
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
 
 namespace VolleyCSharp.Utility
 {
+    /// <summary>
+    /// 日志工具
+    /// </summary>
     public class MarkerLog : Java.Lang.Object
     {
         private class Marker
@@ -56,7 +65,7 @@ namespace VolleyCSharp.Utility
             {
                 if (mFinished)
                 {
-                    throw new Java.Lang.IllegalStateException("Marker Added to finished log");
+                    throw new OperationCanceledException("Marker Added to finished log");
                 }
                 mMarkers.Add(new Marker(name, threadId, SystemClock.ElapsedRealtime()));
             }

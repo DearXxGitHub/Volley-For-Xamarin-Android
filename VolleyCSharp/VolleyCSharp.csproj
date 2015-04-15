@@ -72,7 +72,6 @@
     <Compile Include="CustError\TimeoutError.cs" />
     <Compile Include="ToolBox\AndroidAuthenticator.cs" />
     <Compile Include="NetCom\BasicNetwork.cs" />
-    <Compile Include="NetCom\ByteArrayPool.cs" />
     <Compile Include="CacheCom\CacheHeader.cs" />
     <Compile Include="MainCom\ClearCacheRequest.cs" />
     <Compile Include="CacheCom\DiskBasedCache.cs" />
