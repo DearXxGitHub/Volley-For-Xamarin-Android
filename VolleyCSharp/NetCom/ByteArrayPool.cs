@@ -10,7 +10,11 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 
-namespace VolleyCSharp.ToolBox
+/*
+ * 15.4.15 ¸ÄÐ´
+ */
+
+namespace VolleyCSharp.NetCom
 {
     public class ByteComparable : Java.Lang.Object, Java.Util.IComparator
     {

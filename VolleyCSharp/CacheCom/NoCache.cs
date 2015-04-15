@@ -11,8 +11,15 @@ using Android.Views;
 using Android.Widget;
 using VolleyCSharp.CacheCom;
 
-namespace VolleyCSharp.ToolBox
+/*
+ * 15.4.15 改写
+ */
+
+namespace VolleyCSharp.CacheCom
 {
+    /// <summary>
+    /// 如果不需要缓存则使用该类
+    /// </summary>
     public class NoCache : ICache
     {
         public Entry Get(string key)

@@ -10,7 +10,11 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 
-namespace VolleyCSharp
+/*
+ * 15.4.15 ¸ÄÐ´
+ */
+
+namespace VolleyCSharp.MainCom
 {
     public interface IRequestFilter
     {

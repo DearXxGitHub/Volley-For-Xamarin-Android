@@ -3,8 +3,6 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{587E0745-8B31-492F-A026-0B1DBA7CE3EE}</ProjectGuid>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
@@ -14,8 +12,6 @@
     <FileAlignment>512</FileAlignment>
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <AndroidUseLatestPlatformSdk>
-    </AndroidUseLatestPlatformSdk>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -26,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AndroidLinkMode>None</AndroidLinkMode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,18 +31,18 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>DLL\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>DLL\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustError\AuthFailureError.cs" />
@@ -54,8 +51,6 @@
     <Compile Include="Delivery\ExecutorDelivery.cs" />
     <Compile Include="CacheCom\ICache.cs" />
     <Compile Include="Entry.cs" />
-    <Compile Include="IErrorListener.cs" />
-    <Compile Include="IListener.cs" />
     <Compile Include="NetCom\INetwork.cs" />
     <Compile Include="Utility\InternalUtils.cs" />
     <Compile Include="MainCom\IRequestFilter.cs" />
@@ -78,17 +73,17 @@
     <Compile Include="CustError\TimeoutError.cs" />
     <Compile Include="ToolBox\AndroidAuthenticator.cs" />
     <Compile Include="NetCom\BasicNetwork.cs" />
-    <Compile Include="ToolBox\ByteArrayPool.cs" />
+    <Compile Include="NetCom\ByteArrayPool.cs" />
     <Compile Include="CacheCom\CacheHeader.cs" />
-    <Compile Include="ToolBox\ClearCacheRequest.cs" />
+    <Compile Include="MainCom\ClearCacheRequest.cs" />
     <Compile Include="CacheCom\DiskBasedCache.cs" />
     <Compile Include="NetCom\HttpClientStack.cs" />
-    <Compile Include="ToolBox\HttpHeaderParser.cs" />
+    <Compile Include="Utility\HttpHeaderParser.cs" />
     <Compile Include="ToolBox\IAuthenticator.cs" />
     <Compile Include="NetCom\IHttpStack.cs" />
     <Compile Include="NetCom\IUrlRewriter.cs" />
     <Compile Include="ToolBox\JsonRequest.cs" />
-    <Compile Include="ToolBox\NoCache.cs" />
+    <Compile Include="CacheCom\NoCache.cs" />
     <Compile Include="ToolBox\StringRequest.cs" />
     <Compile Include="ToolBox\Volley.cs" />
     <Compile Include="CustError\VolleyError.cs" />

@@ -11,9 +11,11 @@ using Android.Views;
 using Android.Widget;
 using VolleyCSharp.Delivery;
 using System.Collections.Concurrent;
+using VolleyCSharp.Utility;
+using VolleyCSharp.MainCom;
 
 /*
- * 15.4.13 改写
+ * 15.4.15 改写
  */
 
 namespace VolleyCSharp.CacheCom
@@ -25,8 +27,15 @@ namespace VolleyCSharp.CacheCom
     public class CacheDispatcher : Java.Lang.Thread
     {
         private static bool DEBUG = VolleyLog.DEBUG;
+
+        /*
+         * 原java版采用闭包引用RequestQueue中的以下变量，
+         * 而C#版本采用构造函数注入的形式，并且将原本的
+         * 普通队列改成支持多线程的队列
+         */
         private ConcurrentQueue<Request> mCacheQueue;
         private ConcurrentQueue<Request> mNetworkQueue;
+
         private ICache mCache;
         private IResponseDelivery mDelivery;
         private volatile bool mQuit = false;
@@ -58,7 +67,7 @@ namespace VolleyCSharp.CacheCom
             {
                 try
                 {
-                    Request request =null;
+                    Request request = null;
                     if (!mCacheQueue.TryDequeue(out request))
                     {
                         if (mQuit)
@@ -69,12 +78,14 @@ namespace VolleyCSharp.CacheCom
                     }
                     request.AddMarker("cache-queue-take");
 
+                    //请求是否已取消
                     if (request.IsCanceled)
                     {
                         request.Finish("cache-discard-canceled");
                         continue;
                     }
 
+                    //不存在该缓存
                     Entry entry = mCache.Get(request.GetCacheKey());
                     if (entry == null)
                     {
@@ -83,6 +94,7 @@ namespace VolleyCSharp.CacheCom
                         continue;
                     }
 
+                    //缓存过期
                     if (entry.IsExpired)
                     {
                         request.AddMarker("cache-hit-expired");
@@ -91,10 +103,12 @@ namespace VolleyCSharp.CacheCom
                         continue;
                     }
 
+                    //缓存命中
                     request.AddMarker("cache-hit");
                     Response response = request.ParseNetworkResponse(new NetworkResponse(entry.Data, entry.ResponseHeaders));
                     request.AddMarker("cache-hit-parsed");
 
+                    //判断缓存是否需要更新
                     if (!entry.RefreshNeeded())
                     {
                         mDelivery.PostResponse(request, response);
@@ -106,15 +120,11 @@ namespace VolleyCSharp.CacheCom
                         response.Intermediate = true;
                         mDelivery.PostResponse(request, response, () =>
                         {
-                            try
-                            {
-                                mNetworkQueue.Enqueue(request);
-                            }
-                            catch (Java.Lang.InterruptedException) { }
+                            mNetworkQueue.Enqueue(request);
                         });
                     }
                 }
-                catch (Java.Lang.InterruptedException)
+                catch (Exception)
                 {
                     if (mQuit)
                     {

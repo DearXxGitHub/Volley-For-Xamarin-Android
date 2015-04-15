@@ -10,6 +10,12 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 
+/*
+ * 15.4.15 ¸ÄÐ´
+ */
+using VolleyCSharp.MainCom;
+using VolleyCSharp.Utility;
+
 namespace VolleyCSharp.ToolBox
 {
     public class StringRequest : Request

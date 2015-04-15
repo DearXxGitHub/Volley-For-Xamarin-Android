@@ -9,13 +9,13 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Java.Net;
+using VolleyCSharp.Utility;
 
 /*
- * ÒÑºËÊµ
+ * 15.4.15 ¸ÄÐ´
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.MainCom
 {
     public abstract class Request : IComparable<Request>
     {
@@ -308,9 +308,9 @@ namespace VolleyCSharp
             {
                 foreach (KeyValuePair<String, String> entry in param)
                 {
-                    encoderParams.Append(URLEncoder.Encode(entry.Key, paramsEncoding));
+                    encoderParams.Append(Java.Net.URLEncoder.Encode(entry.Key, paramsEncoding));
                     encoderParams.Append('=');
-                    encoderParams.Append(URLEncoder.Encode(entry.Value, paramsEncoding));
+                    encoderParams.Append(Java.Net.URLEncoder.Encode(entry.Value, paramsEncoding));
                     encoderParams.Append('&');
                 }
                 return new Java.Lang.String(encoderParams).GetBytes(paramsEncoding);

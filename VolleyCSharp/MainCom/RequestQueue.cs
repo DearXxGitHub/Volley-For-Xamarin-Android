@@ -18,8 +18,9 @@ using System.Collections.Concurrent;
 /*
  * 15.4.13 改写
  */
+using VolleyCSharp.Utility;
 
-namespace VolleyCSharp
+namespace VolleyCSharp.MainCom
 {
     /// <summary>
     /// 请求队列，用来启动缓存处理程序和多个网络处理程序用来处理请求

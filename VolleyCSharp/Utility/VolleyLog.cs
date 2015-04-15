@@ -13,10 +13,10 @@ using Android.Util;
 using System.Threading;
 
 /*
- * ÒÑºËÊµ
+ * 15.4.15 ¸ÄÐ´
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.Utility
 {
     public class VolleyLog : Java.Lang.Object
     {

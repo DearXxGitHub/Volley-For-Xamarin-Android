@@ -16,6 +16,7 @@ using VolleyCSharp.ToolBox;
 /*
  * 15.4.13 ¸ÄÐ´
  */
+using VolleyCSharp.MainCom;
 
 namespace VolleyCSharp.NetCom
 {

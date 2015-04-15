@@ -13,10 +13,10 @@ using Org.Apache.Http;
 using System.Net;
 
 /*
- * ÒÑºËÊµ
+ * 15.4.15 ¸ÄÐ´
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.MainCom
 {
     public class NetworkResponse
     {

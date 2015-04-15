@@ -14,6 +14,7 @@ using System.Net;
 /*
  * 2015.4.13 ¸ÄÐ´
  */
+using VolleyCSharp.MainCom;
 
 namespace VolleyCSharp.NetCom
 {

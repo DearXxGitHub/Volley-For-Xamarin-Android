@@ -11,7 +11,11 @@ using Android.Views;
 using Android.Widget;
 using VolleyCSharp.CacheCom;
 
-namespace VolleyCSharp.ToolBox
+/*
+ * 15.4.15 ¸ÄÐ´
+ */
+
+namespace VolleyCSharp.MainCom
 {
     public class ClearCacheRequest : Request
     {

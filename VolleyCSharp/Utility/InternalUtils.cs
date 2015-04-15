@@ -11,10 +11,10 @@ using Android.Views;
 using Android.Widget;
 
 /*
- * ÒÑºËÊµ
+ * 15.4.15 ¸ÄÐ´
  */
 
-namespace VolleyCSharp
+namespace VolleyCSharp.Utility
 {
     public static class InternalUtils
     {

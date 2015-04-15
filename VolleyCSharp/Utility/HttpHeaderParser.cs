@@ -10,8 +10,16 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 
-namespace VolleyCSharp.ToolBox
+/*
+ * 15.4.15 改写
+ */
+using VolleyCSharp.MainCom;
+
+namespace VolleyCSharp.Utility
 {
+    /// <summary>
+    /// 解析回应头部数据
+    /// </summary>
     public class HttpHeaderParser
     {
         public static Entry ParseCacheHeaders(NetworkResponse response)
