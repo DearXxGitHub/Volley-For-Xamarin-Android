@@ -11,11 +11,20 @@ using Android.Views;
 using Android.Widget;
 
 /*
- * 已核实
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
 
 namespace VolleyCSharp
 {
+    /// <summary>
+    /// 用来封装请求完成的对象
+    /// </summary>
     public class Response
     {
         public static Response Success(String result, Entry cacheEntry)

@@ -12,13 +12,19 @@ using Android.Widget;
 using VolleyCSharp.MainCom;
 
 /*
- * 15.3.13 改写
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
 
 namespace VolleyCSharp.Delivery
 {
     /// <summary>
-    /// 用来负责具体在主线程上执行的回调
+    /// 用来负责具体在主线程上执行回调
     /// </summary>
     public class ResponseDeliveryRunnable : Java.Lang.Object, Java.Lang.IRunnable
     {

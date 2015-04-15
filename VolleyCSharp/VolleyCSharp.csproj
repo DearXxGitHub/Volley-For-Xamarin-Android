@@ -53,7 +53,6 @@
     <Compile Include="Entry.cs" />
     <Compile Include="NetCom\INetwork.cs" />
     <Compile Include="Utility\InternalUtils.cs" />
-    <Compile Include="MainCom\IRequestFilter.cs" />
     <Compile Include="IRequestFinishedListener.cs" />
     <Compile Include="Delivery\IResponseDelivery.cs" />
     <Compile Include="IRetryPolicy.cs" />

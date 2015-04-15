@@ -11,11 +11,21 @@ using Android.Views;
 using Android.Widget;
 
 /*
- * 14.4.15 改写
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
 
 namespace VolleyCSharp.CacheCom
 {
+    /// <summary>
+    /// 如果需要自定义缓存必须实现该类
+    /// 并且在CacheDispatcher的构造函数中传入
+    /// </summary>
     public interface ICache
     {
         Entry Get(String key);

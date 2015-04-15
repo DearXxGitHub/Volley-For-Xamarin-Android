@@ -12,11 +12,22 @@ using Android.Widget;
 using VolleyCSharp.Utility;
 
 /*
- * 15.4.15 改写
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
 
 namespace VolleyCSharp.MainCom
 {
+    /// <summary>
+    /// 如果需要自定义自己的请求方式
+    /// 必须继承该类，并实现对应的抽
+    /// 象方法
+    /// </summary>
     public abstract class Request : IComparable<Request>
     {
         private static String DEFAULT_PARAMS_ENCODING = "UTF-8";
@@ -34,73 +45,61 @@ namespace VolleyCSharp.MainCom
             PATCH = 7
         }
 
+        public enum Priority
+        {
+            LOW,
+            NORMAL,
+            HIGH,
+            IMMEDIATE
+        }
+
         private MarkerLog mEventLog = MarkerLog.ENABLED ? new MarkerLog() : null;
-        private Method mMethod;
+
         private String mUrl;
         private String mRedirectUrl;
-        private String mIdentifier;
-        private int mDefaultTrafficStatsTag;
-        private Action<VolleyError> mErrorListener;
-        private int mSequence;
+
         private RequestQueue mRequestQueue;
         private bool mShouldCache = true;
-        private bool mCanceled = false;
         private bool mResponseDelivered = false;
         private long mRequestBirthTime = 0;
         private static long SLOW_REQUEST_THRESHOLD_MS = 3000;
         private IRetryPolicy mRetryPolicy;
-        private Entry mCacheEntry = null;
-        private object mTag;
 
         public Request(String url, Action<VolleyError> listener)
             : this(Method.DEPRECATED_GET_OR_POST, url, listener) { }
 
         public Request(Method method, String url, Action<VolleyError> listener)
         {
-            this.mMethod = method;
             this.mUrl = url;
-            this.mIdentifier = CreateIdentifier(method, url);
-            this.mErrorListener = listener;
+            this.Methods = method;
+            this.Identifier = CreateIdentifier(method, url);
+            this.ErrorListener = listener;
             SetRetryPolicy(new DefaultRetryPolicy());
-
-            mDefaultTrafficStatsTag = FindDefaultTrafficStatsTag(url);
+            this.TrafficStatsTag = FindDefaultTrafficStatsTag(url);
         }
 
-        public Method Methods
+        public Method Methods { get; private set; }
+        public object Tag { get; set; }
+        public Action<VolleyError> ErrorListener { get; private set; }
+        public int TrafficStatsTag { get; private set; }
+        public int Sequence { get; set; }
+        public String Url
         {
             get
             {
-                return this.mMethod;
+                return (mRedirectUrl != null) ? mRedirectUrl : mUrl;
             }
         }
-
-        public object Tag
+        public String OriginUrl
         {
             get
             {
-                return this.mTag;
-            }
-            set
-            {
-                this.mTag = value;
+                return mUrl;
             }
         }
-
-        public Action<VolleyError> ErrorListener
-        {
-            get
-            {
-                return mErrorListener;
-            }
-        }
-
-        public int TrafficStatsTag
-        {
-            get
-            {
-                return this.mDefaultTrafficStatsTag;
-            }
-        }
+        public String Identifier { get; private set; }
+        public Entry CacheEntry { get; set; }
+        public virtual bool IsCanceled { get; private set; }
 
         private static int FindDefaultTrafficStatsTag(String url)
         {
@@ -175,42 +174,6 @@ namespace VolleyCSharp.MainCom
             return this;
         }
 
-        public int Sequence
-        {
-            get
-            {
-                return mSequence;
-            }
-            set
-            {
-                this.mSequence = value;
-            }
-        }
-
-        public String Url
-        {
-            get
-            {
-                return (mRedirectUrl != null) ? mRedirectUrl : mUrl;
-            }
-        }
-
-        public String OriginUrl
-        {
-            get
-            {
-                return mUrl;
-            }
-        }
-
-        public String Identifier
-        {
-            get
-            {
-                return mIdentifier;
-            }
-        }
-
         public void SetRedirectUrl(String redirectUrl)
         {
             this.mRedirectUrl = redirectUrl;
@@ -221,29 +184,9 @@ namespace VolleyCSharp.MainCom
             return Url;
         }
 
-        public Entry CacheEntry
-        {
-            get
-            {
-                return mCacheEntry;
-            }
-            set
-            {
-                this.mCacheEntry = value;
-            }
-        }
-
         public void Cancel()
         {
-            this.mCanceled = true;
-        }
-
-        public virtual bool IsCanceled
-        {
-            get
-            {
-                return mCanceled;
-            }
+            this.IsCanceled = true;
         }
 
         public Dictionary<String, String> GetHeaders()
@@ -317,7 +260,7 @@ namespace VolleyCSharp.MainCom
             }
             catch (Java.IO.UnsupportedEncodingException uee)
             {
-                throw new Java.Lang.RuntimeException("Encoding not supported:" + paramsEncoding, uee);
+                throw new InvalidOperationException("Encoding not supported:" + paramsEncoding);
             }
         }
 
@@ -330,14 +273,6 @@ namespace VolleyCSharp.MainCom
         public bool ShouldCache()
         {
             return this.mShouldCache;
-        }
-
-        public enum Priority
-        {
-            LOW,
-            NORMAL,
-            HIGH,
-            IMMEDIATE
         }
 
         public virtual Priority GetPriority()
@@ -376,9 +311,9 @@ namespace VolleyCSharp.MainCom
 
         public void DeliverError(VolleyError error)
         {
-            if (mErrorListener != null)
+            if (ErrorListener != null)
             {
-                mErrorListener(error);
+                ErrorListener(error);
             }
         }
 
@@ -387,17 +322,20 @@ namespace VolleyCSharp.MainCom
             Priority left = this.GetPriority();
             Priority right = other.GetPriority();
 
-            return left == right ? this.mSequence - other.mSequence : (int)right - (int)left;
+            return left == right ? this.Sequence - other.Sequence : (int)right - (int)left;
         }
 
         public override string ToString()
         {
             String trafficStatsTag = "0x" + Java.Lang.Integer.ToHexString(TrafficStatsTag);
-            return (mCanceled ? "[x] " : "[ ]") + Url + " " + trafficStatsTag + " " + GetPriority().ToString() + " " + mSequence;
+            return (IsCanceled ? "[x] " : "[ ]") + Url + " " + trafficStatsTag + " " + GetPriority().ToString() + " " + Sequence;
         }
 
         private static long sCounter;
 
+        /// <summary>
+        /// 创建请求标识符
+        /// </summary>
         private static String CreateIdentifier(Method method, String url)
         {
             return InternalUtils.SHA1Hash("Request:" + method.ToString() + ":" + url + ":"

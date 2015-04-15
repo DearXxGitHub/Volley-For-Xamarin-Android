@@ -12,17 +12,28 @@ using Android.Widget;
 using System.IO;
 using System.Net;
 using VolleyCSharp.Utility;
+using VolleyCSharp.MainCom;
 
 /*
- * 15.4.15 改写
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
-using VolleyCSharp.MainCom;
 
 namespace VolleyCSharp.NetCom
 {
     /// <summary>
-    /// 封装底层网络
-    /// 原版本是提供在不同系统下使用不同网络实现的方式
+    /// 基础网络
+    /// 原本的版本利用该类来实现在不同系统版本
+    /// 情况下实例化不同的网络实现类，但在该版
+    /// 本下均采用.NET提供的网络库。
+    /// 
+    /// 当然你可以通过实现IHttpStack接口实现Socket
+    /// 方式的网络连接或其他。
     /// </summary>
     public class BasicNetwork : INetwork
     {
@@ -43,6 +54,10 @@ namespace VolleyCSharp.NetCom
 
         #region INetwork
 
+        /// <summary>
+        /// 处理请求的核心
+        /// 不包含底层请求的创建
+        /// </summary>
         public NetworkResponse PerformRequest(Request request)
         {
             long requestStart = SystemClock.ElapsedRealtime();
@@ -55,9 +70,11 @@ namespace VolleyCSharp.NetCom
                 {
                     Dictionary<String, String> headers = new Dictionary<string, string>();
                     AddCacheHeaders(headers, request.CacheEntry);
-                    httpResponse = mHttpStack.PerformRequest(request, headers);
-                    var statusCode = httpResponse.StatusCode;
 
+                    //处理请求
+                    httpResponse = mHttpStack.PerformRequest(request, headers);
+
+                    var statusCode = httpResponse.StatusCode;
                     responseHeaders = ConvertHeaders(httpResponse.Headers);
 
                     if (statusCode == HttpStatusCode.MovedPermanently || statusCode == HttpStatusCode.Moved)
@@ -66,6 +83,7 @@ namespace VolleyCSharp.NetCom
                         request.SetRedirectUrl(newUrl);
                     }
 
+                    //获取请求到的内容
                     Stream output = httpResponse.GetResponseStream();
                     if (output != null)
                     {
@@ -100,7 +118,6 @@ namespace VolleyCSharp.NetCom
                                     responseHeaders, true,
                                     SystemClock.ElapsedRealtime() - requestStart);
                             }
-
                             //entry.ResponseHeaders = entry.ResponseHeaders.Intersect(responseHeaders).ToDictionary(x => x.Key, x => x.Value);
                             return new NetworkResponse(HttpStatusCode.NotModified, entry.Data,
                                 entry.ResponseHeaders, true,
@@ -112,10 +129,6 @@ namespace VolleyCSharp.NetCom
                 catch (TimeoutException)
                 {
                     AttempRetryOnException("connection", request, new TimeoutError());
-                }
-                catch (Java.Net.MalformedURLException e)
-                {
-                    throw new Java.Lang.RuntimeException("Bad URL " + request.Url, e);
                 }
                 catch (IOException e)
                 {
@@ -164,6 +177,9 @@ namespace VolleyCSharp.NetCom
 
         #endregion
 
+        /// <summary>
+        /// 输出请求完成的信息（仅限调试）
+        /// </summary>
         private void LogSlowRequests(long requestLifetime, Request request, byte[] responseContents, HttpStatusCode statusCode)
         {
             if (DEBUG || requestLifetime > SLOW_REQUEST_THRESHOLD_MS)
@@ -191,6 +207,10 @@ namespace VolleyCSharp.NetCom
             request.AddMarker(String.Format("{0}-retry [timeout-{1}]", logPrefix, oldTimeout));
         }
 
+        /// <summary>
+        /// 创建请求头部需要添加的信息
+        /// 主要用来判断请求是否过期
+        /// </summary>
         private void AddCacheHeaders(Dictionary<String, String> headers, Entry entry)
         {
             if (entry == null)

@@ -13,11 +13,21 @@ using Org.Apache.Http;
 using System.Net;
 
 /*
- * 15.4.15 改写
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
 
 namespace VolleyCSharp.MainCom
 {
+    /// <summary>
+    /// 用于封装回应，通过Request的ParseNetworkResponse处理后
+    /// 封装为更抽象的Response对象
+    /// </summary>
     public class NetworkResponse
     {
         public HttpStatusCode StatusCode { get; set; }

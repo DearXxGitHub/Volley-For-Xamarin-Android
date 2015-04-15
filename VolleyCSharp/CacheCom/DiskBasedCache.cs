@@ -13,7 +13,13 @@ using System.IO;
 using VolleyCSharp.Utility;
 
 /*
- * 15.1.13 改写
+ * 原作者Github（java）：https://github.com/mcxiaoke/android-volley
+ * 
+ * C#作者：Y-Z-F
+ * 博客地址：http://www.cnblogs.com/yaozhenfa/
+ * Github地址：https://github.com/yaozhenfa/
+ * 
+ * 15.4.15 审核通过
  */
 
 namespace VolleyCSharp.CacheCom
@@ -23,13 +29,17 @@ namespace VolleyCSharp.CacheCom
     /// </summary>
     public class DiskBasedCache : ICache
     {
-        private Dictionary<String, CacheHeader> mEntries = new Dictionary<string, CacheHeader>(16);
-        private long mTotalSize = 0;
-        private DirectoryInfo mRootDirectory;
-        private int mMaxCacheSizeInBytes;
         public static int DEFAULT_DISK_USAGE_BYTES = 5 * 1024 * 1024;
         public static float HYSTERESIS_FACTOR = 0.9F;
         public static int CACHE_MAGIC = 0x20150306;
+
+        private Dictionary<String, CacheHeader> mEntries = new Dictionary<string, CacheHeader>(16);
+        private long mTotalSize = 0;
+        /// <summary>
+        /// 缓存根文件夹
+        /// </summary>
+        private DirectoryInfo mRootDirectory;
+        private int mMaxCacheSizeInBytes;
 
         public DiskBasedCache(DirectoryInfo rootDirectory, int maxCacheSizeInBytes)
         {
@@ -40,6 +50,9 @@ namespace VolleyCSharp.CacheCom
         public DiskBasedCache(DirectoryInfo rootDirectory)
             : this(rootDirectory, DEFAULT_DISK_USAGE_BYTES) { }
 
+        /// <summary>
+        /// 获取缓存数据
+        /// </summary>
         public Entry Get(string key)
         {
             lock (this)
@@ -79,6 +92,9 @@ namespace VolleyCSharp.CacheCom
             }
         }
 
+        /// <summary>
+        /// 新增缓存数据
+        /// </summary>
         public void Put(string key, Entry entry)
         {
             lock (this)
@@ -110,6 +126,9 @@ namespace VolleyCSharp.CacheCom
             }
         }
 
+        /// <summary>
+        /// 初始化缓存
+        /// </summary>
         public void Initialize()
         {
             lock (this)
@@ -124,6 +143,7 @@ namespace VolleyCSharp.CacheCom
                     return;
                 }
 
+                //获取已缓存文件并添加到缓存表中
                 FileInfo[] files = mRootDirectory.GetFiles();
                 if (files == null)
                 {
@@ -161,6 +181,9 @@ namespace VolleyCSharp.CacheCom
             }
         }
 
+        /// <summary>
+        /// 强制数据失效
+        /// </summary>
         public void Invalidate(string key, bool fullExpire)
         {
             lock (this)
@@ -178,6 +201,9 @@ namespace VolleyCSharp.CacheCom
             }
         }
 
+        /// <summary>
+        /// 删除缓存数据
+        /// </summary>
         public void Remove(string key)
         {
             lock (this)
@@ -192,6 +218,9 @@ namespace VolleyCSharp.CacheCom
             }
         }
 
+        /// <summary>
+        /// 清除缓存
+        /// </summary>
         public void Clear()
         {
             lock (this)
@@ -210,6 +239,9 @@ namespace VolleyCSharp.CacheCom
             }
         }
 
+        /// <summary>
+        /// 根据Key获取文件名
+        /// </summary>
         private String GetFilenameForKey(String key)
         {
             int firstHalfLength = key.Length / 2;
@@ -218,18 +250,25 @@ namespace VolleyCSharp.CacheCom
             return locakFilename;
         }
 
+        /// <summary>
+        /// 根据Key获取文件对象
+        /// </summary>
         public FileInfo GetFileForKey(String key)
         {
             String filePath = mRootDirectory.FullName + "/" + GetFilenameForKey(key);
             return new FileInfo(filePath);
         }
 
+        /// <summary>
+        /// 当需要的空间大于指定空间后清除部分缓存
+        /// </summary>
         private void PruneIfNeeded(int neededSpace)
         {
             if (mTotalSize + neededSpace < mMaxCacheSizeInBytes)
             {
                 return;
             }
+
             if (VolleyLog.DEBUG)
             {
                 VolleyLog.V("Pruning old cache entries.");
