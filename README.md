@@ -99,7 +99,7 @@ var webrequest = (HttpWebRequest)WebRequest.Create(request.Url);
  <li>v1.0 2015-4-15<br/>
   <ol>
    <li>通过String与Json测试</li>
-   <li><暂时未加入ImageRequest</li>
+   <li>暂时未加入ImageRequest</li>
  </ol>
  </li>
 </ul>
